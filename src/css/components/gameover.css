@@ -1,0 +1,40 @@
+/* 游戏结束界面 */
+#game-over {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    z-index: 1000;
+    min-width: 300px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+#game-over::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+#game-over #final-stats {
+    margin: 20px 0;
+}
+
+#game-over #final-stats p {
+    margin: 12px 0;
+    font-size: 1.2em;
+}
+
+#game-over #final-stats span {
+    color: var(--primary-color);
+    font-weight: bold;
+}

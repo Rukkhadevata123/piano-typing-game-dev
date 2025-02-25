@@ -1,0 +1,36 @@
+/* 游戏板样式 */
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(6, var(--cell-size));
+    gap: var(--grid-gap);
+    margin: 0;
+    padding: 10px;
+    background: #eee;
+    border-radius: var(--border-radius);
+}
+
+.row {
+    display: contents;
+}
+
+.cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background: white;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.cell.filled {
+    background-color: var(--cell-color, var(--primary-color));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.cell:active {
+    opacity: 0.7;
+}

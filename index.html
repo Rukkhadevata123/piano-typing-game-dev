@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="一个基于键盘按键的音游模拟游戏" />
+  <title>6K音游模拟器</title>
+  <!-- 路径保持相对形式，Vite 会根据 base 处理 -->
+  <link href="/css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <!-- 游戏主容器 -->
+  <div id="game-container">
+    <header>
+      <h1>6K音游模拟器</h1>
+      <div class="key-guide">
+        按键说明:
+        <span class="key">A</span>
+        <span class="key">S</span>
+        <span class="key">D</span> /
+        <span class="key">J</span>
+        <span class="key">K</span>
+        <span class="key">L</span>
+        <br>
+        <span class="theme-hint">
+          按 <span class="key">T</span> 切换主题 /
+          按 <span class="key">Q</span> 切换时间 /
+          按 <span class="key">R</span> 切换模式
+        </span>
+      </div>
+    </header>
+    <div class="game-area">
+      <aside class="game-stats">
+        <div id="stats-container">
+          <div id="score">分数: 0</div>
+          <div id="timer">剩余时间: 60</div>
+          <div id="mode">模式: 整行</div>
+          <div id="accuracy">准确率: 100%</div>
+          <div id="cps">CPS: 0</div>
+          <div id="combo">连击: 0</div>
+        </div>
+        <div id="history-container">
+          <h3>历史记录</h3>
+          <div id="history-stats"></div>
+        </div>
+      </aside>
+      <main id="game-board"></main>
+    </div>
+    <div id="game-over" style="display: none">
+      <h2>游戏结束！</h2>
+      <div id="final-stats">
+        <p>最终得分: <span id="final-score">0</span></p>
+        <p>平均CPS: <span id="final-cps">0</span></p>
+        <p>准确率: <span id="final-accuracy">0%</span></p>
+        <p>最大连击: <span id="final-max-combo">0</span></p>
+      </div>
+      <button id="restart-button">重新开始</button>
+    </div>
+  </div>
+  <div class="loading-container" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">加载中...</div>
+  </div>
+  <div id="error-container"></div>
+  <footer class="game-footer">
+    <a href="https://github.com/Rukkhadevata123/piano-typing-game-dev" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/GitHub-查看源码-black?style=flat-square&logo=github" alt="GitHub repository">
+    </a>
+  </footer>
+  <!-- 脚本路径保持一致 -->
+  <script src="/js/main.js" type="module"></script>
+</body>
+
+</html>

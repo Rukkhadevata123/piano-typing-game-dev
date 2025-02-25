@@ -1,0 +1,13 @@
+:root {
+    --cell-size: 60px;
+    --grid-gap: 5px;
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --background-color: #f0f0f0;
+    --text-color: #333;
+    --error-color: #e74c3c;
+    --border-color: #ddd;
+    --border-radius: 8px;
+    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 0 20px rgba(0, 0, 0, 0.1);
+}

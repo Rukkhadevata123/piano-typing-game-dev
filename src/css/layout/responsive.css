@@ -1,0 +1,226 @@
+/* 响应式布局样式 */
+/* 移动端适配 */
+@media (max-width: 768px),
+(orientation: portrait) {
+
+    /* 游戏容器优化 */
+    #game-container {
+        padding: 10px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    /* 游戏区域布局优化 */
+    .game-area {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 10px 0;
+        padding: 0 10px;
+    }
+
+    /* 游戏面板优化 */
+    #game-board {
+        order: 1;
+        width: 100%;
+        display: grid;
+        /* 使用 min() 确保列宽不会太窄 */
+        grid-template-columns: repeat(6, minmax(min(15vw, 60px), 1fr));
+        gap: min(2vw, 8px);
+        /* 动态间距 */
+        padding: min(3vw, 12px);
+        box-sizing: border-box;
+        margin: 0 auto;
+        background: rgba(238, 238, 238, 0.9);
+        border-radius: var(--border-radius);
+        /* 添加最大宽度限制 */
+        max-width: min(100%, 500px);
+    }
+
+    /* 方块样式优化 */
+    .cell {
+        width: 100%;
+        /* 设置最小高度 */
+        min-height: min(15vw, 60px);
+        height: 0;
+        padding-bottom: 100%;
+        position: relative;
+    }
+
+    .cell::before {
+        content: '';
+        position: absolute;
+        /* 动态内边距 */
+        top: min(1vw, 4px);
+        left: min(1vw, 4px);
+        right: min(1vw, 4px);
+        bottom: min(1vw, 4px);
+        border-radius: min(1.5vw, 6px);
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+    .cell.filled::before {
+        background: var(--primary-color);
+        /* 移除 transform，避免与其他样式冲突 */
+        transform: none;
+    }
+
+    /* 添加彩虹主题特殊处理 */
+    .cell.filled[style*="background-color"]::before {
+        /* 确保背景色正确显示 */
+        background: inherit;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    /* 统计区域优化 */
+    .game-stats {
+        order: 2;
+        width: 100%;
+    }
+
+    #stats-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        /* 改为3列布局 */
+        gap: 6px;
+        width: 100%;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--border-radius);
+    }
+
+    #stats-container>div {
+        padding: 8px 4px;
+        font-size: 0.85em;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.03);
+        border-radius: 4px;
+    }
+
+    /* 历史记录区域优化 */
+    #history-container {
+        width: 100%;
+        margin-top: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--border-radius);
+        padding: 12px;
+    }
+
+    #history-container h3 {
+        margin: 0 0 8px 0;
+        font-size: 1em;
+        color: var(--text-color);
+    }
+
+    .history-entry {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: rgba(0, 0, 0, 0.02);
+        border-radius: 4px;
+        font-size: 0.8em;
+    }
+
+    .history-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    .history-entry .history-header {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 添加中等屏幕优化 */
+@media (min-width: 375px) and (max-width: 768px) {
+    #game-board {
+        /* 中等屏幕下的最大宽度 */
+        max-width: 450px;
+        margin: 0 auto;
+    }
+}
+
+/* 小屏幕设备优化 */
+@media (max-width: 374px) {
+    #game-board {
+        /* 使用更紧凑的布局 */
+        grid-template-columns: repeat(6, 1fr);
+        gap: 4px;
+        padding: 8px;
+    }
+
+    .cell {
+        min-height: 40px;
+        /* 确保最小高度 */
+    }
+}
+
+
+/* 超小屏幕设备优化 */
+@media (max-width: 320px) {
+    #stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        /* 超小屏使用2列 */
+    }
+
+    .history-entry {
+        font-size: 0.75em;
+    }
+
+    .cell {
+        border-radius: 4px;
+    }
+}
+
+/* 保持横屏模式的优化 */
+@media (orientation: landscape) and (max-height: 500px) {
+    .game-area {
+        flex-direction: row;
+        align-items: flex-start;
+        /* 添加最大宽度限制 */
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 min(3vw, 20px);
+    }
+
+    #game-board {
+        flex: 1;
+        /* 横屏模式下的最大宽度 */
+        max-width: 600px;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .cell {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    .cell:active::before {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    .key-guide {
+        display: none;
+    }
+
+    /* 增加按钮触摸区域 */
+    #restart-button {
+        padding: 15px 30px;
+        font-size: 1.1em;
+        min-width: 120px;
+    }
+}
