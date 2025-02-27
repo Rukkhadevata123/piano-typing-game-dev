@@ -35,6 +35,9 @@
     /* 动画效果 */
     transition: all var(--animation-speed) var(--animation-timing);
     transform-origin: top center;
+
+    /* 提升性能 */
+    will-change: transform;
 }
 
 /* 填充状态 */
@@ -47,6 +50,8 @@
 /* 下落动画 */
 .cell.dropping {
     animation: dropAnimation var(--animation-speed) var(--animation-timing);
+    animation-fill-mode: both;
+    /* 保持最终状态 */
 }
 
 /* 点击反馈 */
@@ -56,12 +61,12 @@
 
 /* 下落动画关键帧 */
 @keyframes dropAnimation {
-    from {
+    0% {
         transform: translateY(-100%);
         opacity: 0.5;
     }
 
-    to {
+    100% {
         transform: translateY(0);
         opacity: 1;
     }

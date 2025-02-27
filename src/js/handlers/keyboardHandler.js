@@ -4,7 +4,6 @@ export class KeyboardHandler {
   constructor(game) {
     this.game = game;
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    this.lastKeyTime = 0; // 防抖
   }
 
   init() {
@@ -12,10 +11,6 @@ export class KeyboardHandler {
   }
 
   handleKeyPress(event) {
-    const now = Date.now();
-    if (now - this.lastKeyTime < 50) return; // 50ms 防抖 //TODO
-    this.lastKeyTime = now;
-
     const key = event.key.toUpperCase();
     if (key === 'T') {
       this.game.switchTheme();
