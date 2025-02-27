@@ -78,9 +78,9 @@ export class Board {
     this.board[row][column] = value;
   }
 
-  getBoard() {
-    return this.board;
-  }
+  // getBoard() {
+  //   return this.board;
+  // }
 
   // 新增：为 GameView 提供渲染数据
   getRenderData() {

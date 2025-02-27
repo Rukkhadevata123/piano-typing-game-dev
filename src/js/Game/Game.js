@@ -16,7 +16,7 @@ export class Game {
   constructor() {
     console.log('[Game] Constructor 开始初始化');
     this.modeManager = new ModeManager();
-    this.state = new GameState(this.modeManager);
+    this.state = new GameState();
     this.board = new Board(this.state.difficultyManager);
     this.view = new GameView(this.board);
     this.scoreManager = new ScoreManager();
@@ -121,7 +121,7 @@ export class Game {
     console.log(`[Game] 处理命中: 列=${column}`);
     this.board.setCell(gameConfig.rows - 1, column, 0);
     this.scoreManager.increase(gameConfig.points.hit);
-    playSound('tap');
+    playSound('tap').then((r) => r);
     this.statsManager.update(true);
 
     if (!this.state.isGameRunning()) {
@@ -134,7 +134,7 @@ export class Game {
   handleMiss() {
     console.log('[Game] 处理未命中');
     this.scoreManager.increase(gameConfig.points.miss);
-    playSound('error');
+    playSound('error').then((r) => r);
     this.statsManager.update(false);
   }
 
@@ -241,7 +241,7 @@ export class Game {
     this.state.endGame(stats, score);
     this.scoreManager.saveHighScore();
     this.saveGameHistory(stats, score);
-    playSound('gameOver');
+    playSound('gameOver').then((r) => r);
 
     // 在显示结束统计前记录最大连击
     console.log('[Game] 显示最终统计，最大连击:', stats.maxCombo);
@@ -303,7 +303,7 @@ export class Game {
     this.view.unbindRestartButton();
   }
 
-  isGameOver() {
-    return this.state.isOver();
-  }
+  // isGameOver() {
+  //   return this.state.isOver();
+  // }
 }

@@ -11,6 +11,6 @@ export const keyMap = {
 };
 
 // 可选：反向映射
-export const reverseKeyMap = Object.fromEntries(
-  Object.entries(keyMap).map(([key, value]) => [value, key])
-);
+// export const reverseKeyMap = Object.fromEntries(
+//   Object.entries(keyMap).map(([key, value]) => [value, key])
+// );

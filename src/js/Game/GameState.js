@@ -4,9 +4,8 @@ import { DifficultyManager } from '@js/core/difficulty.js';
 import { safeStorage } from '@js/utils/safeStorage.js';
 
 export class GameState {
-  constructor(modeManager) {
+  constructor() {
     console.log('[GameState] 开始初始化');
-    this.modeManager = modeManager;
     this.difficultyManager = new DifficultyManager();
 
     // 加载保存的时间索引
@@ -124,12 +123,6 @@ export class GameState {
       console.error('[GameState] 切换游戏时间失败:', error);
       return null;
     }
-  }
-
-  resetTimer() {
-    console.log('[GameState] 重置计时器');
-    this.timeLeft = gameConfig.timeDurations[this.currentTimeIndex];
-    console.log(`[GameState] 计时器重置为: ${this.timeLeft}`);
   }
 
   getCurrentTimeIndex() {

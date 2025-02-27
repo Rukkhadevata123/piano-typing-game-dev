@@ -19,7 +19,7 @@ Object.values(sounds).forEach((sound) => {
 export async function playSound(soundName) {
   try {
     const sound = sounds[soundName];
-    if (!sound) throw new Error(`Sound "${soundName}" not found`);
+    // if (!sound) throw new Error(`Sound "${soundName}" not found`);
     sound.currentTime = 0;
     await sound.play();
   } catch (error) {

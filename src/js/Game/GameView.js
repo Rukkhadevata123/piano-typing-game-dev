@@ -62,7 +62,7 @@ export class GameView {
     console.log('[GameView] 初始化元素完成:', Object.keys(this.elements));
 
     // 验证关键元素是否存在
-    if (!this.elements.game_board) {
+    if (!this.getElementById('game-board')) {
       console.error('[GameView] 关键元素game_board不存在');
       throw new Error(
         'Game board element not found. Make sure the HTML contains an element with id "game-board"'
@@ -70,15 +70,21 @@ export class GameView {
     }
   }
 
+  getElementById(id) {
+    const elementId = id.split('-').join('_');
+    return this.elements[elementId];
+  }
+
   renderBoard() {
     console.log('[GameView] 开始渲染游戏板');
-    if (!this.elements.game_board) {
+    const gameBoard = this.getElementById('game-board');
+    if (!gameBoard) {
       console.error('[GameView] 游戏板元素不可用');
       return;
     }
 
     const oldCells = this.getPreviousCellStates();
-    this.elements.game_board.innerHTML = '';
+    gameBoard.innerHTML = '';
 
     this.board.getRenderData().forEach((row, rowIndex) => {
       const rowDiv = document.createElement('div');
@@ -87,7 +93,7 @@ export class GameView {
       row.forEach((cell, colIndex) => {
         rowDiv.appendChild(this.createCell(rowIndex, colIndex, cell, oldCells));
       });
-      this.elements.game_board.appendChild(rowDiv);
+      gameBoard.appendChild(rowDiv);
     });
     console.log('[GameView] 游戏板渲染完成');
   }
@@ -95,9 +101,10 @@ export class GameView {
   getPreviousCellStates() {
     console.log('[GameView] 获取之前的单元格状态');
     const cells = new Map();
-    if (!this.elements.game_board) return cells;
+    const gameBoard = this.getElementById('game-board');
+    if (!gameBoard) return cells;
 
-    this.elements.game_board.querySelectorAll('.cell').forEach((cell) => {
+    gameBoard.querySelectorAll('.cell').forEach((cell) => {
       const key = `${cell.dataset.row}-${cell.dataset.col}`;
       const value = cell.classList.contains('filled');
       cells.set(key, value);
@@ -180,7 +187,7 @@ export class GameView {
 
   bindRestartButton(handler) {
     console.log('[GameView] 绑定重启按钮');
-    const button = this.elements.restart_button;
+    const button = this.getElementById('restart-button');
     if (!button) {
       console.warn('[GameView] 找不到重启按钮');
       return;
@@ -218,7 +225,7 @@ export class GameView {
 
   unbindRestartButton() {
     console.log('[GameView] 解绑重启按钮');
-    const button = this.elements.restart_button;
+    const button = this.getElementById('restart-button');
     if (button && this.restartHandler) {
       console.log('[GameView] 移除重启按钮事件监听器');
       button.removeEventListener('click', this.restartHandler);
@@ -232,7 +239,8 @@ export class GameView {
 
   updateTimer(timeLeft) {
     console.log(`[GameView] 更新计时器: ${timeLeft}`);
-    if (!this.elements.timer) {
+    const timerElement = this.getElementById('timer');
+    if (!timerElement) {
       console.warn('[GameView] 计时器元素不存在');
       return;
     }
@@ -245,7 +253,7 @@ export class GameView {
       // 使用 requestAnimationFrame 确保视图更新同步
       requestAnimationFrame(() => {
         console.log(`[GameView] 更新计时器DOM: ${formattedTime}`);
-        this.elements.timer.textContent = `剩余时间: ${formattedTime}`;
+        timerElement.textContent = `剩余时间: ${formattedTime}`;
       });
     } catch (error) {
       console.error('[GameView] 更新计时器失败:', error);
@@ -254,8 +262,9 @@ export class GameView {
 
   updateScore(score) {
     console.log(`[GameView] 更新分数: ${score}`);
-    if (this.elements.score) {
-      this.elements.score.textContent = `分数: ${score}`;
+    const scoreElement = this.getElementById('score');
+    if (scoreElement) {
+      scoreElement.textContent = `分数: ${score}`;
     } else {
       console.warn('[GameView] 分数元素不存在');
     }
@@ -263,24 +272,29 @@ export class GameView {
 
   updateStats(stats) {
     console.log('[GameView] 更新统计数据:', stats);
-    if (this.elements.accuracy) {
+    const accuracyElement = this.getElementById('accuracy');
+    const cpsElement = this.getElementById('cps');
+    const comboElement = this.getElementById('combo');
+
+    if (accuracyElement) {
       console.log(`[GameView] 更新准确率: ${stats.accuracy}%`);
-      this.elements.accuracy.textContent = `准确率: ${stats.accuracy}%`;
+      accuracyElement.textContent = `准确率: ${stats.accuracy}%`;
     }
-    if (this.elements.cps) {
+    if (cpsElement) {
       console.log(`[GameView] 更新CPS: ${stats.cps}`);
-      this.elements.cps.textContent = `CPS: ${stats.cps}`;
+      cpsElement.textContent = `CPS: ${stats.cps}`;
     }
-    if (this.elements.combo) {
+    if (comboElement) {
       console.log(`[GameView] 更新连击: ${stats.currentCombo}`);
-      this.elements.combo.textContent = `连击: ${stats.currentCombo}`;
+      comboElement.textContent = `连击: ${stats.currentCombo}`;
     }
   }
 
   updateMode(modeText) {
     console.log(`[GameView] 更新游戏模式: ${modeText}`);
-    if (this.elements.mode) {
-      this.elements.mode.textContent = `模式: ${modeText}`;
+    const modeElement = this.getElementById('mode');
+    if (modeElement) {
+      modeElement.textContent = `模式: ${modeText}`;
     } else {
       console.warn('[GameView] 模式元素不存在');
     }
@@ -288,14 +302,15 @@ export class GameView {
 
   showFinalStats(stats, finalScore) {
     console.log('[GameView] 显示最终统计', { stats, finalScore });
-    if (!this.elements.game_over) {
+    const gameOverElement = this.getElementById('game-over');
+    if (!gameOverElement) {
       console.warn('[GameView] 游戏结束弹窗元素不存在');
       return;
     }
 
     // 先确保弹窗可见
     console.log('[GameView] 显示游戏结束弹窗');
-    this.elements.game_over.style.display = 'block';
+    gameOverElement.style.display = 'block';
 
     // 数据安全处理
     const safeStats = {
@@ -307,30 +322,35 @@ export class GameView {
     console.log('[GameView] 准备更新最终统计元素', safeStats);
 
     // 直接访问正确转换后的元素 ID
-    if (this.elements.final_score) {
+    const finalScoreElement = this.getElementById('final-score');
+    const finalCpsElement = this.getElementById('final-cps');
+    const finalAccuracyElement = this.getElementById('final-accuracy');
+    const finalMaxComboElement = this.getElementById('final-max-combo');
+
+    if (finalScoreElement) {
       console.log(`[GameView] 更新最终分数: ${finalScore}`);
-      this.elements.final_score.textContent = finalScore;
+      finalScoreElement.textContent = finalScore;
     } else {
       console.warn('[GameView] 最终分数元素不存在');
     }
 
-    if (this.elements.final_cps) {
+    if (finalCpsElement) {
       console.log(`[GameView] 更新最终CPS: ${safeStats.cps}`);
-      this.elements.final_cps.textContent = safeStats.cps;
+      finalCpsElement.textContent = safeStats.cps;
     } else {
       console.warn('[GameView] 最终CPS元素不存在');
     }
 
-    if (this.elements.final_accuracy) {
+    if (finalAccuracyElement) {
       console.log(`[GameView] 更新最终准确率: ${safeStats.accuracy}%`);
-      this.elements.final_accuracy.textContent = `${safeStats.accuracy}%`;
+      finalAccuracyElement.textContent = `${safeStats.accuracy}%`;
     } else {
       console.warn('[GameView] 最终准确率元素不存在');
     }
 
-    if (this.elements.final_max_combo) {
+    if (finalMaxComboElement) {
       console.log(`[GameView] 更新最终最大连击: ${safeStats.maxCombo}`);
-      this.elements.final_max_combo.textContent = safeStats.maxCombo;
+      finalMaxComboElement.textContent = safeStats.maxCombo;
     } else {
       console.warn('[GameView] 最终最大连击元素不存在 (final_max_combo)');
       // 列出所有存在的元素名称以便调试
@@ -340,32 +360,34 @@ export class GameView {
     // 添加动画类
     requestAnimationFrame(() => {
       console.log('[GameView] 添加游戏结束弹窗动画');
-      this.elements.game_over.classList.add('show');
+      gameOverElement.classList.add('show');
     });
   }
 
   hideGameOver() {
     console.log('[GameView] 隐藏游戏结束弹窗');
-    if (!this.elements.game_over) {
+    const gameOverElement = this.getElementById('game-over');
+    if (!gameOverElement) {
       console.warn('[GameView] 游戏结束弹窗元素不存在');
       return;
     }
 
     // 移除显示类
-    this.elements.game_over.classList.remove('show');
+    gameOverElement.classList.remove('show');
     console.log('[GameView] 移除游戏结束动画类');
 
     // 延迟隐藏元素，等待动画完成
     setTimeout(() => {
       console.log('[GameView] 完全隐藏游戏结束弹窗');
-      this.elements.game_over.style.display = 'none';
+      gameOverElement.style.display = 'none';
     }, 300); // 与 CSS 过渡时间匹配
   }
 
   markGameAsLoaded() {
     console.log('[GameView] 标记游戏加载完成');
-    if (this.elements.game_container) {
-      this.elements.game_container.classList.add('loaded');
+    const gameContainerElement = this.getElementById('game-container');
+    if (gameContainerElement) {
+      gameContainerElement.classList.add('loaded');
       console.log('[GameView] 游戏容器添加loaded类');
     } else {
       console.warn('[GameView] 游戏容器元素不存在');

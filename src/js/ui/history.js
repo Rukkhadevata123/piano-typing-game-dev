@@ -143,22 +143,4 @@ export class HistoryManager {
     console.log('[HistoryManager] 添加新的历史UI元素');
     container.appendChild(div);
   }
-
-  getHistory() {
-    console.log(`[HistoryManager] 获取历史记录 (${this.#history.length} 条)`);
-    return [...this.#history];
-  }
-
-  clear() {
-    console.log('[HistoryManager] 清除所有历史记录');
-    this.#history = [];
-    this.#save();
-    const container = document.getElementById('history-stats');
-    if (container) {
-      console.log('[HistoryManager] 清除历史记录UI');
-      container.innerHTML = '';
-    } else {
-      console.warn('[HistoryManager] 找不到历史记录容器元素，无法清除UI');
-    }
-  }
 }

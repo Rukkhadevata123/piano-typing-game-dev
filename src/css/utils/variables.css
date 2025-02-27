@@ -23,6 +23,8 @@
     /* 主色调 - 蓝色 */
     --secondary-color: #2980b9;
     /* 次要色调 - 深蓝 */
+    --cell-color: #f39c12;
+    /* 方格色 - 橙色 */
 
     /* 功能颜色 */
     --background-color: #f0f0f0;

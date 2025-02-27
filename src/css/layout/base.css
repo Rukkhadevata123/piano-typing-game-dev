@@ -13,7 +13,7 @@
 /* 基础布局 */
 body {
     background-color: var(--background-color);
-    font-family: var(--font-family);
+    font-family: var(--font-family), sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
