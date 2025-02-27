@@ -1,29 +1,43 @@
-/* 基础布局样式 */
+/**
+ * 基础布局样式
+ * 包含：重置样式、基础布局、公共样式
+ */
+
+/* 重置样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 基础布局 */
 body {
     background-color: var(--background-color);
-    font-family: "Arial", sans-serif;
-    margin: 0;
+    font-family: var(--font-family);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
+/* 游戏容器 */
 #game-container {
     text-align: center;
-    padding: 20px;
-    background: white;
+    padding: var(--spacing);
+    background: var(--container-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-medium);
 }
 
+/* 游戏区域布局 */
 .game-area {
     display: grid;
     grid-template-columns: 200px 1fr;
-    gap: 20px;
-    margin: 20px 0;
+    gap: var(--grid-gap);
+    margin: var(--spacing) 0;
 }
 
+/* 游戏数据区域 */
 .game-stats {
     text-align: left;
 }

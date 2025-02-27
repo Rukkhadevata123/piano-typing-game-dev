@@ -1,25 +1,33 @@
-/* 历史记录样式 */
+/**
+ * 历史记录样式
+ * 包含：记录列表、条目样式
+ */
+
+/* 历史记录容器 */
 #history-container {
-    padding: 15px;
+    padding: var(--spacing);
     background: rgba(255, 255, 255, 0.9);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
 }
 
+/* 标题样式 */
 #history-container h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 var(--spacing-small) 0;
     color: var(--text-color);
 }
 
+/* 记录条目 */
 .history-entry {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 10px;
+    gap: var(--spacing-small);
+    padding: var(--spacing-small);
     border-bottom: 1px solid var(--border-color);
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
 }
 
+/* 记录头部 */
 .history-entry .history-header {
     grid-column: 1 / -1;
     display: flex;

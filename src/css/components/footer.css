@@ -1,20 +1,29 @@
+/**
+ * 页脚组件样式
+ * 包含：页脚布局、响应式适配
+ */
+
+/* 页脚基础样式 */
 .game-footer {
     position: fixed;
-    bottom: 10px;
+    bottom: var(--spacing-small);
     left: 50%;
     transform: translateX(-50%);
-    padding: 10px;
+    padding: var(--spacing-small);
     text-align: center;
-    z-index: 100;
+    z-index: var(--z-index-base);
+
+    /* 视觉效果 */
     background: rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
     backdrop-filter: blur(5px);
 }
 
+/* 链接样式 */
 .game-footer a {
     text-decoration: none;
-    transition: opacity 0.3s;
+    transition: opacity var(--animation-speed);
 }
 
 .game-footer a:hover {
@@ -26,8 +35,27 @@
     .game-footer {
         position: static;
         transform: none;
-        margin-top: 20px;
+        margin-top: var(--spacing);
         background: transparent;
         box-shadow: none;
+    }
+}
+
+/* 横屏模式优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .game-footer {
+        position: absolute;
+        top: var(--spacing-small);
+        left: var(--spacing-small);
+        bottom: auto;
+        transform: none;
+        background: transparent;
+        box-shadow: none;
+        padding: var(--spacing-small);
+    }
+
+    .game-footer img {
+        transform: scale(0.8);
+        opacity: 0.7;
     }
 }

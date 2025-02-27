@@ -1,37 +1,52 @@
-/* 动画效果 */
+/**
+ * 全局动画定义
+ * 包含：淡入、滑入、旋转等基础动画
+ */
+
+/* 淡入动画 */
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
+/* 从右滑入 */
 @keyframes slideIn {
     from {
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
     }
 }
 
+/* 旋转动画 */
 @keyframes spin {
-    0% {
+    from {
         transform: rotate(0deg);
     }
-    100% {
+
+    to {
         transform: rotate(360deg);
     }
 }
 
+/* 动画工具类 */
 .fade-in {
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn var(--animation-speed) var(--animation-timing);
 }
 
 .slide-in {
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn var(--animation-speed) var(--animation-timing);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
 }

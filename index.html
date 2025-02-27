@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="一个基于键盘按键的音游模拟游戏" />
   <title>6K音游模拟器</title>
   <!-- 路径保持相对形式，Vite 会根据 base 处理 -->
@@ -43,7 +43,9 @@
         </div>
         <div id="history-container">
           <h3>历史记录</h3>
-          <div id="history-stats"></div>
+          <div id="history-stats" class="history-stats">
+            <!-- 历史记录将在这里动态插入 -->
+          </div>
         </div>
       </aside>
       <main id="game-board"></main>
@@ -56,6 +58,7 @@
         <p>准确率: <span id="final-accuracy">0%</span></p>
         <p>最大连击: <span id="final-max-combo">0</span></p>
       </div>
+      <div class="overlay-backdrop"></div>
       <button id="restart-button">重新开始</button>
     </div>
   </div>

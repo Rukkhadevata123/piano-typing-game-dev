@@ -1,42 +1,63 @@
-/* 按键指南样式 */
+/**
+ * 按钮组件样式
+ * 包含：按键指南、重启按钮
+ */
+
+/* 按键指南 */
 .key-guide {
-    margin: 15px 0;
-    font-size: 1.2em;
+    margin: var(--spacing) 0;
+    font-size: var(--font-size-large);
     color: var(--text-color);
 }
 
+/* 主题提示 */
 .theme-hint {
     display: block;
-    margin-top: 10px;
-    font-size: 0.9em;
+    margin-top: var(--spacing-small);
+    font-size: var(--font-size-small);
     color: var(--text-color);
     opacity: 0.8;
 }
 
+/* 按键样式 */
 .key {
     display: inline-block;
     padding: 4px 8px;
     margin: 0 2px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-family: monospace;
     font-weight: bold;
-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-light);
 }
 
-/* 按钮样式 */
+/* 重启按钮 */
 #restart-button {
-    padding: 12px 24px;
-    font-size: 1.1em;
+    margin-top: var(--spacing);
+    width: 100%;
+    padding: var(--spacing) var(--spacing-large);
+    font-size: var(--font-size-base);
     background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.2s ease;
+    z-index: calc(var(--z-index-overlay) + 1);
+    position: relative;
 }
 
-#restart-button:hover {
+#restart-button:hover:not(:disabled) {
     background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+#restart-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+#restart-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

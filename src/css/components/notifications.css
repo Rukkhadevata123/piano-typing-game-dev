@@ -1,31 +1,37 @@
-/* 通知样式 */
+/**
+ * 通知提示样式
+ * 包含：主题切换提示、动画效果
+ */
+
+/* 主题通知 */
 .theme-notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.8);
+    top: var(--spacing);
+    right: var(--spacing);
+    padding: var(--spacing-small) var(--spacing);
+
+    /* 视觉样式 */
+    background: var(--overlay-background);
     color: white;
-    padding: 10px 20px;
     border-radius: var(--border-radius);
+    z-index: var(--z-index-overlay);
+
+    /* 动画效果 */
     animation: fadeInOut 1.5s ease-in-out;
-    z-index: 1000;
 }
 
+/* 通知动画 */
 @keyframes fadeInOut {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    20% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    80% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+
+    0%,
     100% {
         opacity: 0;
         transform: translateY(-20px);
+    }
+
+    20%,
+    80% {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

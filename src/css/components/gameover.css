@@ -1,40 +1,66 @@
-/* 游戏结束界面 */
+/**
+ * 游戏结束界面样式
+ * 包含：弹窗、遮罩、统计信息
+ */
+
+/* 游戏结束容器 */
 #game-over {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.95);
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+    min-width: 300px;
+    padding: var(--spacing-large);
+    background: var(--overlay-background);
     color: white;
-    padding: 25px;
     border-radius: var(--border-radius);
     text-align: center;
-    z-index: 1000;
-    min-width: 300px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-medium);
+    z-index: var(--z-index-overlay);
+    transition: all 0.3s ease;
+    pointer-events: none;
 }
 
-#game-over::before {
-    content: "";
+#game-over.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 背景遮罩 */
+.overlay-backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: calc(var(--z-index-overlay) - 1);
+    pointer-events: none;
 }
 
-#game-over #final-stats {
-    margin: 20px 0;
+#game-over.show+.overlay-backdrop {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-#game-over #final-stats p {
-    margin: 12px 0;
-    font-size: 1.2em;
+/* 统计数据样式优化 */
+#final-stats {
+    margin: var(--spacing) 0;
+    display: grid;
+    gap: var(--spacing-small);
 }
 
-#game-over #final-stats span {
+#final-stats p {
+    margin: 0;
+    font-size: var(--font-size-large);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#final-stats span {
     color: var(--primary-color);
     font-weight: bold;
+    font-size: 1.2em;
 }

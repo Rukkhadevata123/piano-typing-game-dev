@@ -1,15 +1,38 @@
-/* Use @import with aliases */
+/**
+ * 主样式文件
+ * 按照以下顺序组织导入:
+ * 1. 工具类 (变量、动画等)
+ * 2. 基础布局
+ * 3. 组件样式
+ */
+
+/* 工具类 
+ * --------------------------------- */
+/* 全局变量和主题配置 */
 @import '@css/utils/variables.css';
+/* 全局动画定义 */
 @import '@css/utils/animations.css';
+
+/* 布局样式
+ * --------------------------------- */
+/* 基础布局和重置样式 */
 @import '@css/layout/base.css';
+/* 响应式布局规则 */
 @import '@css/layout/responsive.css';
 
-@import '@css/components/board.css';
-@import '@css/components/buttons.css';
-@import '@css/components/history.css';
-@import '@css/components/notifications.css';
-@import '@css/components/stats.css';
-@import '@css/components/gameover.css';
-@import '@css/components/loading.css';
-@import '@css/components/error.css';
-@import '@css/components/footer.css';
+/* 组件样式
+ * --------------------------------- */
+/* 游戏核心组件 */
+@import '@css/components/board.css';     /* 游戏棋盘 */
+@import '@css/components/stats.css';     /* 游戏数据 */
+@import '@css/components/buttons.css';   /* 按钮样式 */
+
+/* 游戏状态组件 */
+@import '@css/components/loading.css';   /* 加载状态 */
+@import '@css/components/gameover.css';  /* 游戏结束 */
+@import '@css/components/error.css';     /* 错误提示 */
+
+/* 辅助功能组件 */
+@import '@css/components/history.css';      /* 历史记录 */
+@import '@css/components/notifications.css'; /* 通知提示 */
+@import '@css/components/footer.css';       /* 页脚样式 */

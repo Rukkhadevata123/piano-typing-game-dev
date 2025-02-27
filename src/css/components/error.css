@@ -1,28 +1,24 @@
+/**
+ * 错误提示组件样式
+ * 包含：错误消息、动画效果
+ */
+
+/* 错误容器 */
 #error-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: var(--spacing);
+    right: var(--spacing);
     max-width: 300px;
-    z-index: 1000;
+    z-index: var(--z-index-overlay);
 }
 
+/* 错误消息 */
 .error-message {
     background: rgba(255, 0, 0, 0.1);
     border: 1px solid var(--error-color);
     border-radius: var(--border-radius);
     color: var(--error-color);
-    padding: 15px;
-    margin-bottom: 10px;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    padding: var(--spacing);
+    margin-bottom: var(--spacing-small);
+    animation: slideIn var(--animation-speed) var(--animation-timing);
 }

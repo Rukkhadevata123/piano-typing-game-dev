@@ -1,25 +1,33 @@
+/**
+ * 游戏统计信息样式
+ * 包含：计分板、连击显示
+ */
+
 /* 统计信息容器 */
 #stats-container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding: 15px;
+    gap: var(--spacing-small);
+    margin-bottom: var(--spacing);
+    padding: var(--spacing);
+
+    /* 视觉样式 */
     background: rgba(255, 255, 255, 0.9);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
 }
 
-#stats-container > div {
+/* 统计项目 */
+#stats-container>div {
     text-align: left;
-    padding: 8px;
-    font-size: 1.1em;
+    padding: var(--spacing-small);
+    font-size: var(--font-size-base);
     color: var(--text-color);
     min-width: 150px;
 }
 
-/* 特殊效果 */
+/* 连击显示 */
 #combo {
     font-weight: bold;
-    color: #e74c3c;
+    color: var(--error-color);
 }
