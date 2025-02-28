@@ -1,24 +1,31 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
+const isElectron = process.env.ELECTRON === 'true';
+const isProd = process.env.NODE_ENV === 'production';
+
 export default defineConfig({
-    // 动态设置 base：开发时为 '/'，生产时为 '/piano-typing-game/'
-    base: process.env.NODE_ENV === 'production' ? '/piano-typing-game/' : '/',
-    // 定义全局变量，用于 JS 中动态路径
+    // 基础配置
+    base: isElectron ? './' : (isProd ? '/piano-typing-game/' : '/'),
+    
+    // 环境变量定义
     define: {
         'import.meta.env.BASE_URL': JSON.stringify(
-            process.env.NODE_ENV === 'production' ? '/piano-typing-game/' : '/'
+            isElectron ? './' : (isProd ? '/piano-typing-game/' : '/')
         ),
     },
-    // 指定构建输出目录
+    
+    // 构建配置
     build: {
         outDir: 'dist',
-        assetsDir: 'assets', // 静态资源存放目录
-        // 添加构建优化选项
+        assetsDir: 'assets',
         minify: 'terser',
-
+        rollupOptions: isElectron ? {
+            output: { format: 'cjs' }
+        } : {}
     },
-    // 可选：添加路径别名，简化导入
+    
+    // 路径别名配置
     resolve: {
         alias: {
             '@css': resolve(__dirname, 'src/css'),
@@ -28,6 +35,8 @@ export default defineConfig({
             '@audio': resolve(__dirname, 'public/audio')
         }
     },
+    
+    // 开发服务器配置
     server: {
         port: 3000,
         open: true,
