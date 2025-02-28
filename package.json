@@ -18,18 +18,13 @@
     "electron:dev": "concurrently \"cross-env ELECTRON=true vite\" \"wait-on http://localhost:3000 && cross-env ELECTRON=true NODE_ENV=development electron-forge start\"",
     "electron:package": "cross-env ELECTRON=true vite build && electron-forge package",
     "electron:make": "cross-env ELECTRON=true vite build && electron-forge make",
-    "build:electron": "cross-env ELECTRON=true vite build",
-    
-    "make:win": "cross-env ELECTRON=true vite build && electron-forge make --platform win32",
-    "make:mac": "cross-env ELECTRON=true vite build && electron-forge make --platform darwin",
-    "make:linux": "cross-env ELECTRON=true vite build && electron-forge make --platform linux"
+    "make:linux": "cross-env ELECTRON=true vite build && electron-forge make --platform linux",
+    "make:portable": "cross-env ELECTRON=true vite build && electron-forge make --target @electron-forge/maker-zip"
   },
   "devDependencies": {
 
     "@electron-forge/cli": "^7.7.0",
     "@electron-forge/maker-deb": "^7.7.0",
-    "@electron-forge/maker-rpm": "^7.7.0",
-    "@electron-forge/maker-squirrel": "^7.7.0",
     "@electron-forge/maker-zip": "^7.7.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.7.0",
     "@electron-forge/plugin-fuses": "^7.7.0",
@@ -44,16 +39,11 @@
     "eslint-plugin-jsdoc": "^50.6.3",
     "eslint-plugin-prettier": "^5.2.3",
     "prettier": "^3.5.2",
-    
     "vite": "^6.1.0",
     "terser": "^5.39.0",
-    
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "wait-on": "^8.0.2",
     "globals": "^16.0.0"
-  },
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
   }
 }

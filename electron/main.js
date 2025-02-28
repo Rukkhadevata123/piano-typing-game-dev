@@ -1,16 +1,10 @@
 import { app, BrowserWindow } from 'electron';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import squirrelStartup from 'electron-squirrel-startup';
 
 // 初始化配置
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Windows 安装事件处理
-if (squirrelStartup) {
-    app.quit();
-}
 
 // 创建主窗口
 const createWindow = () => {
@@ -49,16 +43,7 @@ const createWindow = () => {
 // 应用生命周期事件
 app.whenReady().then(createWindow);
 
-// macOS 应用激活事件
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
-});
-
 // 窗口关闭事件
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
