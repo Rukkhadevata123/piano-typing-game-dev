@@ -121,7 +121,25 @@ npm run lint
 
 # 格式化代码
 npm run format
+
+# 与Electron有关的命令请查看package.json
 ```
+
+### Linux 用户
+
+我们为 Linux 用户提供了两种安装方式：
+
+1. DEB 包安装
+
+```bash
+# 下载并安装 DEB 包
+sudo dpkg -i piano-typing-game_1.2.0_amd64.deb
+```
+
+2. 便携版
+
+- 下载 `piano-typing-game-portable.zip`
+- 解压后即可运行，无需安装
 
 ## 📝 未来计划
 
