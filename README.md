@@ -3,6 +3,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-Rukkhadevata123-black?style=flat-square&logo=github)](https://github.com/Rukkhadevata123/piano-typing-game-dev)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Vite](https://img.shields.io/badge/Vite-v6.1.0-646CFF?style=flat-square&logo=vite)](https://vitejs.dev)
+[![Electron](https://img.shields.io/badge/Electron-v28.2.0-47848F?style=flat-square&logo=electron)](https://www.electronjs.org)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)
 
 ## ⛏️ 项目简介
@@ -12,6 +13,7 @@
 ## 📌 技术栈
 
 - [Vite](https://vitejs.dev/) 现代前端构建工具
+- [Electron](https://www.electronjs.org/) - 跨平台桌面应用开发框架
 - JavaScript (ES6+) 面向对象编程
 - HTML5 + CSS3 响应式设计
 - LocalStorage 数据持久化
@@ -138,8 +140,30 @@ sudo dpkg -i piano-typing-game_1.2.0_amd64.deb
 
 2. 便携版
 
-- 下载 `piano-typing-game-portable.zip`
+- 下载 `piano-typing-game-linux-portable.zip`
 - 解压后即可运行，无需安装
+
+### Windows 用户
+
+我们提供了两种安装方式：
+
+1. 单文件版本
+
+```bash
+# 下载 Piano-Typing-Game-1.2.0-win64.exe
+# 双击运行即可，无需安装
+```
+
+2. 便携版
+
+- 下载 `piano-typing-game-win32-portable.zip`
+- 解压后运行 `piano-typing-game.exe`
+
+注意事项：
+
+- 支持 Windows 10/11 64位系统
+- 首次运行可能需要 Windows Defender 确认
+- 如果遇到 SmartScreen 提示，点击"更多信息"后选择"仍要运行"
 
 ## 📝 未来计划
 

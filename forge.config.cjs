@@ -6,7 +6,17 @@ module.exports = {
     asar: true,
     name: "Piano Typing Game",
     executableName: "piano-typing-game",
-    // 移除 Windows/macOS 相关配置
+    env: {
+      WINEARCH: 'win64',
+      WINEPREFIX: process.env.HOME + '/.wine',
+    },
+    win32metadata: {
+      CompanyName: 'Rukkhadevata123',
+      FileDescription: 'Piano Typing Game',
+      OriginalFilename: 'piano-typing-game.exe',
+      ProductName: 'Piano Typing Game',
+      InternalName: 'piano-typing-game'
+    }
   },
   
   rebuildConfig: {},
@@ -35,13 +45,41 @@ module.exports = {
         }
       }
     },
+    // 添加 Windows 安装程序配置
+    {
+      name: '@electron-forge/maker-squirrel',
+      platforms: ['win32'],
+      config: {
+        name: 'piano-typing-game',
+        exe: 'piano-typing-game.exe',
+        setupIcon: './public/icon.ico',
+        // loadingGif: './public/installer.gif', // 可选
+        // 移除 setup 字样
+        setupExe: 'Piano-Typing-Game-${version}-win64.exe',
+        noMsi: true,
+        authors: 'Rukkhadevata123',
+        remoteRealease: false,
+        noDelta: true,
+        noRepair: true,
+        description: 'A piano typing game built with Electron',
+        // Wine 相关配置（仅在 Linux 下构建 Windows 版本时需要）
+        wineVer: 'stable',
+        wineMono: '/usr/bin/mono',
+        wineProgram: '/usr/bin/wine',
+        environments: ['wine']
+      }
+    },
     // 添加 ZIP 便携版配置
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['linux'],
-      config: {
-        // 可选：指定输出文件名
-        name: 'piano-typing-game-portable'
+      platforms: ['linux', 'win32'],
+      config: (arch) => {
+        const platform = process.platform;
+        return {
+          name: platform === 'win32' ? 
+            'piano-typing-game-win32-portable' : 
+            'piano-typing-game-linux-portable'
+        };
       }
     }
   ],
