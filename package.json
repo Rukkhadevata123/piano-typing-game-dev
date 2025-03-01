@@ -17,7 +17,7 @@
     "electron:make": "cross-env ELECTRON=true vite build && electron-forge make",
     "make:linux": "cross-env ELECTRON=true vite build && electron-forge make --platform linux",
     "make:linux-portable": "cross-env ELECTRON=true vite build && electron-forge make --target @electron-forge/maker-zip",
-    "make:win": "cross-env ELECTRON=true vite build && electron-forge make --platform win32",
+    
     "make:win-portable": "cross-env ELECTRON=true vite build && electron-forge make --platform win32 --target @electron-forge/maker-zip"
   },
   "devDependencies": {

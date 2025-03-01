@@ -129,7 +129,7 @@ npm run format
 
 ### Linux 用户
 
-我们为 Linux 用户提供了两种安装方式：
+我们为 Linux 用户提供了两种选择：
 
 1. DEB 包安装
 
@@ -138,32 +138,24 @@ npm run format
 sudo dpkg -i piano-typing-game_1.2.0_amd64.deb
 ```
 
-2. 便携版
+2. 便携版（推荐）
 
 - 下载 `piano-typing-game-linux-portable.zip`
-- 解压后即可运行，无需安装
+- 解压后运行可执行文件
+- 支持任意位置运行
 
 ### Windows 用户
 
-我们提供了两种安装方式：
-
-1. 单文件版本
-
-```bash
-# 下载 Piano-Typing-Game-1.2.0-win64.exe
-# 双击运行即可，无需安装
-```
-
-2. 便携版
+提供便携版本：
 
 - 下载 `piano-typing-game-win32-portable.zip`
 - 解压后运行 `piano-typing-game.exe`
+- 支持U盘运行，无需安装
 
 注意事项：
 
 - 支持 Windows 10/11 64位系统
 - 首次运行可能需要 Windows Defender 确认
-- 如果遇到 SmartScreen 提示，点击"更多信息"后选择"仍要运行"
 
 ## 📝 未来计划
 
@@ -180,6 +172,7 @@ sudo dpkg -i piano-typing-game_1.2.0_amd64.deb
 
 - 移动端适配尚不完善
 - 部分浏览器可能存在兼容性问题
+- `Electron`体积较大
 - 可能有未发现的潜在 Bug
 
 ## 🤝 参与贡献
