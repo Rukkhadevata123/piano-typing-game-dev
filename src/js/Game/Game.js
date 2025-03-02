@@ -24,14 +24,23 @@ export class Game {
   initializeComponents() {
     this.modeManager = new ModeManager();
     this.state = new GameState();
+    this.statsManager = new StatsManager();
     this.board = new Board(this.state.difficultyManager);
     this.view = new GameView(this.board);
     this.scoreManager = new ScoreManager();
-    this.statsManager = new StatsManager();
     this.historyManager = new HistoryManager();
     this.keyboardHandler = new KeyboardHandler(this);
     this.touchHandler = new TouchHandler(this);
     this.handleRestart = this.init.bind(this);
+
+    // 注入 StatsManager 到 GameState 以同步状态
+    this.state.setStatsManager(this.statsManager);
+
+    // 绑定连击中断事件处理器
+    this.statsManager.onComboBreak = (combo) => {
+      console.log(`[Game] 连击中断: ${combo}`);
+      // 可以在这里添加额外的游戏反馈，如震动效果等
+    };
   }
 
   bindEventHandlers() {
@@ -91,22 +100,90 @@ export class Game {
     });
   }
 
+  // 优化命中处理函数
   handleHit(column) {
     this.board.setCell(gameConfig.rows - 1, column, 0);
-    this.scoreManager.increase(gameConfig.points.hit);
-    void playSound('tap');
+
+    // 先更新统计数据，保证连击计数准确
     this.statsManager.update(true);
 
+    // 获取更新后的统计数据
+    const stats = this.statsManager.getStats();
+    const timeLeft = this.state.timeLeft;
+    const totalTime =
+      gameConfig.timeDurations[this.state.getCurrentTimeIndex()];
+    // 使用更新后的统计数据计算得分
+    const scoreDetails = this.scoreManager.calculateScore(
+      true,
+      stats,
+      timeLeft,
+      totalTime
+    );
+
+    // 播放音效
+    void playSound('tap');
+
+    // 首次命中时启动计时器
     if (!this.state.isGameRunning()) {
       this.startGameTimer();
     }
+    // 处理方块下落
     this.handleDrop(column);
+
+    // 里程碑奖励处理
+    if (scoreDetails.details.milestoneBonus > 0) {
+      this.view.showComboMilestone(
+        stats.currentCombo,
+        scoreDetails.details.milestoneBonus
+      );
+      // 普通分数反馈时不显示连击信息，避免重复
+      const feedbackDetails = { ...scoreDetails };
+      feedbackDetails.details.milestoneBonus = 0;
+
+      // 显示常规分数反馈
+      this.view.showScoreFeedback(feedbackDetails, column);
+    } else {
+      // 直接显示常规分数反馈
+      this.view.showScoreFeedback(scoreDetails, column);
+    }
   }
 
+  // 优化失误处理函数
   handleMiss() {
-    this.scoreManager.increase(gameConfig.points.miss);
+    // 获取当前统计
+    const stats = this.statsManager.getStats();
+    const timeLeft = this.state.timeLeft;
+    const totalTime =
+      gameConfig.timeDurations[this.state.getCurrentTimeIndex()];
+
+    // 计算得分（必须在statsManager.update前计算，确保正确的连击数）
+    const scoreDetails = this.scoreManager.calculateScore(
+      false,
+      stats,
+      timeLeft,
+      totalTime
+    );
+
+    // 播放音效
     void playSound('error');
+
+    // 特殊处理连击中断
+    const hasSignificantCombo = stats.currentCombo > 5;
+    const hasComboPenalty = scoreDetails.details.comboPenalty > 0;
+
+    if (hasSignificantCombo && hasComboPenalty) {
+      // 连击中断通知
+      this.view.showComboBreak(
+        stats.currentCombo,
+        scoreDetails.details.comboPenalty
+      );
+    }
+
+    // 更新统计数据（重置连击）
     this.statsManager.update(false);
+
+    // 显示失误得分反馈
+    this.view.showScoreFeedback(scoreDetails);
   }
 
   startGameTimer() {
@@ -142,15 +219,22 @@ export class Game {
 
   updateGameView() {
     // 使用节流避免过频渲染
-    if (!this.updatePending) {
-      this.updatePending = true;
-      requestAnimationFrame(() => {
-        this.view.renderBoard();
-        this.view.updateStats(this.statsManager.getStats());
-        this.view.updateScore(this.scoreManager.getScore());
-        this.updatePending = false;
-      });
-    }
+    if (this.updatePending) return;
+
+    this.updatePending = true;
+    requestAnimationFrame(() => {
+      this.view.renderBoard();
+
+      // 以相同顺序更新UI元素，避免布局跳动
+      const stats = this.statsManager.getStats();
+      this.view.updateStats(stats);
+
+      const score = this.scoreManager.getScore();
+      const details = this.scoreManager.getLastScoreDetails();
+      this.view.updateScore(score, details);
+
+      this.updatePending = false;
+    });
   }
 
   switchGameTime() {
@@ -181,9 +265,12 @@ export class Game {
   endGame(stats, score) {
     this.state.endGame(stats, score);
     this.scoreManager.saveHighScore();
+
+    const duration = gameConfig.timeDurations[this.state.getCurrentTimeIndex()];
     this.saveGameHistory(stats, score);
+
     void playSound('gameOver');
-    this.view.showFinalStats(stats, score);
+    this.view.showFinalStats(stats, score, duration);
   }
 
   saveGameHistory(stats, score) {

@@ -31,6 +31,7 @@
 @import '@css/components/loading.css';   /* 加载状态 */
 @import '@css/components/gameover.css';  /* 游戏结束 */
 @import '@css/components/error.css';     /* 错误提示 */
+@import '@css/components/score.css';     /* 得分显示 */
 
 /* 辅助功能组件 */
 @import '@css/components/history.css';      /* 历史记录 */
