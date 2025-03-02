@@ -48,6 +48,34 @@
     position: relative;
 }
 
+/* 按键提示样式 - 更协调的设计 */
+.key-hint {
+    /* 降低对比度，使用更柔和的外观 */
+    opacity: 0.9;
+    /* 与按钮字体保持一致，删除 monospace */
+    font-size: 0.9em;
+    font-weight: normal;
+    /* 调整间距 */
+    margin-left: 6px;
+    /* 更细微的背景，降低透明度 */
+    background-color: rgba(255, 255, 255, 0.08);
+    /* 调整内边距使其更紧凑 */
+    padding: 1px 4px;
+    /* 更小的圆角与按钮更协调 */
+    border-radius: 2px;
+    /* 添加微妙的边框增强可读性 */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    /* 添加过渡效果，按钮悬停时更平滑 */
+    transition: all 0.2s ease;
+}
+
+/* 按钮悬停时按键提示也跟随变化 */
+#restart-button:hover .key-hint {
+    /* 悬停时轻微增加对比度 */
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 #restart-button:hover:not(:disabled) {
     background: var(--secondary-color);
     transform: translateY(-2px);

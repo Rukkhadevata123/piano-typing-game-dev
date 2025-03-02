@@ -21,6 +21,15 @@ export class KeyboardHandler {
       else this.game.switchGameMode();
       return;
     }
+
+    // 空格键重新开始游戏
+    if (key === ' ' || key === 'SPACE') {
+      if (this.game.state.isOver()) {
+        this.game.init(); // 游戏结束状态下重新开始游戏
+        return;
+      }
+    }
+
     if (this.game.state.isOver()) return;
 
     const column = keyMap[key];
