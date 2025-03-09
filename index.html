@@ -44,6 +44,11 @@
           <div id="accuracy">准确率: 100%</div>
           <div id="cps">CPS: 0</div>
           <div id="combo">连击: 0</div>
+          <div id="player-rating">
+            等级分: 0.0
+            <button id="rating-details-button" title="查看等级分详情">ⓘ</button>
+          </div>
+          <div id="rating-level">青铜等级</div>
         </div>
         <div id="history-container">
           <h3>历史记录</h3>
@@ -55,17 +60,26 @@
       <main id="game-board"></main>
       <div id="combo-milestone-container" class="combo-milestone-container"></div>
     </div>
-    <div id="game-over" style="display: none">
-      <h2>游戏结束！</h2>
-      <div id="final-stats">
-        <p>游戏时长: <span id="final-duration">0s</span></p>
-        <p>最终得分: <span id="final-score">0</span></p>
-        <p>平均CPS: <span id="final-cps">0</span></p>
-        <p>准确率: <span id="final-accuracy">0%</span></p>
-        <p>最大连击: <span id="final-max-combo">0</span></p>
+    <div id="game-over" class="overlay">
+      <div class="game-over-content">
+        <h2>游戏结束</h2>
+        <div id="final-stats">
+          <p>游戏时长: <span id="final-duration">0</span></p>
+          <p>最终得分: <span id="final-score">0</span></p>
+          <p>最大连击: <span id="final-max-combo">0</span></p>
+          <p>准确率: <span id="final-accuracy">0%</span></p>
+          <p>平均CPS: <span id="final-cps">0</span></p>
+          <!-- 预设等级分容器 -->
+          <div id="rating-container" class="rating-result" style="display:none;">
+            <p>本局等级分: <span id="game-rating">0.0</span></p>
+            <p>当前等级分: <span id="current-rating">0.0</span></p>
+            <p id="new-best-container" style="display:none;">
+              <span class="new-best">✨ 新的最佳记录!</span>
+            </p>
+          </div>
+        </div>
+        <button id="restart-button">重新开始 <span class="key-hint">[空格]</span></button>
       </div>
-      <div class="overlay-backdrop"></div>
-      <button id="restart-button">重新开始 <span class="key-hint">[空格]</span></button>
     </div>
   </div>
   <div class="loading-container" id="loading">

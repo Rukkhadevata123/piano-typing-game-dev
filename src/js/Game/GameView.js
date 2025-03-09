@@ -7,21 +7,29 @@ import { ThemeManager } from '@js/Game/views/ThemeManager.js';
  * 游戏视图 - 协调各个视图组件
  */
 export class GameView {
-  constructor(board) {
+  constructor(board, options = {}) {
     console.log('[GameView] 初始化');
     this.board = board;
 
-    // 初始化各子组件
-    this.boardView = new BoardView(board);
-    this.uiManager = new UIManager();
-    this.notificationSystem = new NotificationSystem();
-    this.themeManager = new ThemeManager();
+    // 依赖注入优化
+    this.boardView = options.boardView || new BoardView(board);
+    this.uiManager = options.uiManager || new UIManager();
+    this.notificationSystem =
+      options.notificationSystem || new NotificationSystem();
+    this.themeManager = options.themeManager || new ThemeManager();
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.init());
     } else {
       this.init();
     }
+  }
+
+  setGame(game) {
+    this.game = game;
+    // 使用委托模式，直接传递game引用给UIManager
+    this.uiManager.setGame(game);
+    return this; // 支持链式调用
   }
 
   init() {
@@ -52,8 +60,8 @@ export class GameView {
     this.uiManager.updateMode(modeText);
   }
 
-  showFinalStats(stats, finalScore, duration) {
-    this.uiManager.showFinalStats(stats, finalScore, duration);
+  showFinalStats(stats, finalScore, duration, ratingResult = null) {
+    this.uiManager.showFinalStats(stats, finalScore, duration, ratingResult);
   }
 
   hideGameOver() {
@@ -66,6 +74,7 @@ export class GameView {
 
   bindRestartButton(handler) {
     this.uiManager.bindRestartButton(handler);
+    return this;
   }
 
   unbindRestartButton() {
@@ -103,5 +112,11 @@ export class GameView {
   // 辅助方法
   getElementById(id) {
     return this.uiManager.getElementById(id);
+  }
+
+  // 添加更新等级分的代理方法
+  updateRating(ratingData) {
+    this.uiManager.updateRating(ratingData);
+    return this;
   }
 }

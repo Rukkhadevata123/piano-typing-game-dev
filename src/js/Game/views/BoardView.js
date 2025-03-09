@@ -89,7 +89,7 @@ export class BoardView {
       cancelAnimationFrame(this.animationQueue.get(cell));
     }
 
-    // 添加新动画
+    // 添加新动画 - 确保与animations.css中的动画名称一致
     const animationFrame = requestAnimationFrame(() => {
       void cell.offsetWidth; // 强制重排
       cell.classList.add('dropping');

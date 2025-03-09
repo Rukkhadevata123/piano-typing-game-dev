@@ -1,6 +1,6 @@
 /**
  * 全局动画定义
- * 包含：淡入、滑入、旋转等基础动画
+ * 所有通用动画效果集中管理
  */
 
 /* ---------- 基础动画 ---------- */
@@ -36,6 +36,21 @@
 
     to {
         transform: rotate(360deg);
+    }
+}
+
+/* 脉动动画 */
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 5px currentColor;
+    }
+
+    50% {
+        transform: scale(1.1);
+        text-shadow: 0 0 15px currentColor;
     }
 }
 
@@ -87,8 +102,8 @@
 }
 
 /* ---------- 连击相关动画 ---------- */
-/* 连击里程碑动画 */
-@keyframes comboMilestone {
+/* 连击里程碑和中断共用动画 */
+@keyframes comboEffect {
     0% {
         opacity: 0;
         transform: scale(0.8) translateY(20px);
@@ -114,7 +129,39 @@
     }
 }
 
-/* 连击中断动画 */
+/* 连击里程碑动画 - 使用共用动画 */
+@keyframes comboMilestone {
+
+    0%,
+    100% {
+        animation-timing-function: ease-in-out;
+    }
+
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+
+    15% {
+        opacity: 1;
+        transform: scale(1.2) translateY(0);
+    }
+
+    25% {
+        transform: scale(1) translateY(0);
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+}
+
+/* 连击中断动画 - 独立保留以避免兼容性问题 */
 @keyframes comboBreak {
     0% {
         opacity: 0;
@@ -187,4 +234,92 @@
 
 .pulse {
     animation: pulseUp 0.5s ease;
+}
+
+/* ---------- 段位变化动画 ---------- */
+.level-change-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.level-change-animation.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 段位下降特殊样式 */
+.level-change-animation.level-down .level-change-content {
+    background-color: rgba(255, 250, 250, 0.95);
+    box-shadow: 0 0 50px rgba(255, 100, 100, 0.3);
+}
+
+.level-change-animation.level-down .level-change-title {
+    color: #e74c3c;
+}
+
+.level-change-animation.level-down .level-change-arrow {
+    color: #e74c3c;
+}
+
+.level-down-message {
+    margin-top: 15px;
+    font-style: italic;
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.level-change-content {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+    transform: translateY(30px);
+    transition: transform 0.7s ease, opacity 0.7s ease;
+    opacity: 0;
+}
+
+.level-change-animation.show .level-change-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.level-change-title {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.level-change-from,
+.level-change-to {
+    font-size: 1.8em;
+    font-weight: bold;
+    padding: 10px;
+    margin: 5px 0;
+    display: inline-block;
+}
+
+.level-change-to {
+    font-size: 2.2em;
+    animation: pulse 1.5s infinite;
+}
+
+.level-change-arrow {
+    font-size: 2em;
+    margin: 10px 0;
+    color: var(--primary-color);
 }

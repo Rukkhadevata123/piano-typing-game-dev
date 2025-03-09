@@ -21,6 +21,8 @@
     /* 主要颜色 */
     --primary-color: #3498db;
     /* 主色调 - 蓝色 */
+    --primary-color-rgb: 52, 152, 219;
+    /* 主色调RGB值 - 用于rgba函数 */
     --secondary-color: #2980b9;
     /* 次要色调 - 深蓝 */
     --cell-color: #f39c12;

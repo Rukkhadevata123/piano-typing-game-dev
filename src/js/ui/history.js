@@ -1,7 +1,7 @@
 import { formatTime } from '@js/utils/timeFormat.js';
 import { safeStorage } from '@js/utils/safeStorage.js';
 
-const MAX_ENTRIES = 3;
+const MAX_ENTRIES = 1;
 const STORAGE_KEY = 'gameHistory';
 
 export class HistoryManager {

@@ -129,6 +129,8 @@ export class NotificationSystem {
       className: `combo-milestone level-${level}`,
       content: `🔥连击 ${combo} 奖励 +${points}`,
       duration: 3500,
+      // 使用comboEffect动画
+      animateClass: 'show',
     });
   }
 
@@ -139,6 +141,8 @@ export class NotificationSystem {
       className: 'combo-milestone combo-break',
       content: `💔连击中断 ${combo} 惩罚 -${penalty}`,
       duration: 2500,
+      // 使用 'show' 类触发动画
+      animateClass: 'show',
     });
   }
 }

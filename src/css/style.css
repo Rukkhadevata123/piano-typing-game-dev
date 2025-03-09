@@ -26,6 +26,7 @@
 @import '@css/components/board.css';     /* 游戏棋盘 */
 @import '@css/components/stats.css';     /* 游戏数据 */
 @import '@css/components/buttons.css';   /* 按钮样式 */
+@import '@css/components/rating.css';    /* 等级评分 */
 
 /* 游戏状态组件 */
 @import '@css/components/loading.css';   /* 加载状态 */

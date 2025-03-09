@@ -2,7 +2,7 @@
  * 游戏核心配置
  */
 export const gameConfig = {
-  rows: 7, // 游戏板行数
+  rows: 9, // 游戏板行数
   columns: 6, // 游戏板列数
   initialDuration: 60, // 初始游戏时长（秒）
   points: {
