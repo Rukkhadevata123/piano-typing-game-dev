@@ -331,6 +331,12 @@ export class UIManager {
       return;
     }
 
+    // 错误检查
+    if (!this.game || !this.game.ratingSystem) {
+      console.error('[UIManager] 无法显示等级分详情：系统未初始化');
+      return;
+    }
+
     const ratingSystem = this.game.ratingSystem;
     const records = ratingSystem.getBestRecords();
 
@@ -435,6 +441,7 @@ export class UIManager {
           <th>分数</th>
           <th>准确率</th>
           <th>CPS</th>
+          <th>最大连击</th>
           <th>时长</th>
           <th>日期</th>
         </tr>
@@ -446,15 +453,29 @@ export class UIManager {
       records.forEach((record, index) => {
         const row = document.createElement('tr');
 
+        // 检查是否为专注模式记录，添加专注模式标识类
+        if (record.focusMode) {
+          row.classList.add('focus-mode-record');
+        }
+
         const date = new Date(record.date);
         const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
+        // 获取最大连击数（如果存在）
+        const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
+
+        // 为专注模式添加标识
+        const focusModeIndicator = record.focusMode
+          ? '<span class="focus-mode-tag">专注</span>'
+          : '';
+
         row.innerHTML = `
           <td>${index + 1}</td>
-          <td><strong>${record.rating.toFixed(1)}</strong></td>
+          <td><strong>${record.rating.toFixed(1)}</strong>${focusModeIndicator}</td>
           <td>${record.score}</td>
           <td>${record.accuracy.toFixed(2)}%</td>
           <td>${record.cps.toFixed(2)}</td>
+          <td>${maxCombo}</td>
           <td>${record.duration}s</td>
           <td>${dateStr}</td>
         `;
@@ -468,15 +489,76 @@ export class UIManager {
       modal.appendChild(noRecords);
     }
 
-    // 添加关闭按钮
+    // 按钮布局容器 - 将导出按钮和关闭按钮放在一起
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'rating-button-container';
+
+    // 修改导出数据按钮样式
+    const exportButton = document.createElement('button');
+    exportButton.className = 'modal-button export-button';
+    // 添加图标到单独的span元素
+    const exportIcon = document.createElement('span');
+    exportIcon.className = 'button-icon';
+    exportIcon.innerHTML = '📊';
+    // 添加文本到单独的span元素
+    const exportText = document.createElement('span');
+    exportText.className = 'button-text';
+    exportText.textContent = '导出记录';
+
+    exportButton.appendChild(exportIcon);
+    exportButton.appendChild(exportText);
+
+    exportButton.onclick = (e) => {
+      e.stopPropagation();
+
+      // 防止重复点击
+      if (exportButton.disabled) return;
+
+      // 添加导出状态反馈
+      exportButton.disabled = true;
+      exportText.textContent = '导出中...';
+
+      setTimeout(() => {
+        this.exportRatingData(records);
+
+        // 恢复按钮状态并显示成功提示
+        exportText.textContent = '已导出';
+        exportIcon.innerHTML = '✓';
+
+        setTimeout(() => {
+          exportText.textContent = '导出记录';
+          exportIcon.innerHTML = '📊';
+          exportButton.disabled = false;
+        }, 1500);
+      }, 300);
+    };
+
+    buttonContainer.appendChild(exportButton);
+
+    // 添加关闭按钮，样式与导出按钮一致
     const closeButton = document.createElement('button');
-    closeButton.textContent = '关闭';
-    closeButton.className = 'close-button';
+    closeButton.className = 'modal-button close-button';
+
+    // 添加图标到单独的span元素
+    const closeIcon = document.createElement('span');
+    closeIcon.className = 'button-icon';
+    closeIcon.innerHTML = '✖';
+
+    // 添加文本到单独的span元素
+    const closeText = document.createElement('span');
+    closeText.className = 'button-text';
+    closeText.textContent = '关闭';
+
+    closeButton.appendChild(closeIcon);
+    closeButton.appendChild(closeText);
+
     closeButton.onclick = (e) => {
       e.stopPropagation(); // 防止事件冒泡
       closeModal();
     };
-    modal.appendChild(closeButton);
+    buttonContainer.appendChild(closeButton);
+
+    modal.appendChild(buttonContainer);
 
     // 添加键盘ESC关闭支持
     document.addEventListener('keydown', handleEsc);
@@ -492,6 +574,59 @@ export class UIManager {
         overlay.classList.add('show');
       });
     });
+  }
+
+  // 添加导出数据的辅助方法
+  exportRatingData(records) {
+    // 准备CSV数据
+    const headers = [
+      '排名',
+      '等级分',
+      '分数',
+      '准确率',
+      'CPS',
+      '最大连击',
+      '时长',
+      '日期',
+      '专注模式', // 添加专注模式列
+    ];
+    let csvContent = headers.join(',') + '\n';
+
+    records.forEach((record, index) => {
+      const date = new Date(record.date);
+      const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+      // 获取最大连击数（如果存在）
+      const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
+
+      const row = [
+        index + 1,
+        record.rating.toFixed(1),
+        record.score,
+        record.accuracy.toFixed(2) + '%',
+        record.cps.toFixed(2),
+        maxCombo,
+        record.duration + 's',
+        dateStr,
+        record.focusMode ? '是' : '否', // 添加专注模式标记
+      ];
+
+      csvContent += row.join(',') + '\n';
+    });
+
+    // 创建下载链接
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `piano-game-ratings-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   showLevelChangeAnimation(oldLevel, newLevel, isLevelUp = true) {

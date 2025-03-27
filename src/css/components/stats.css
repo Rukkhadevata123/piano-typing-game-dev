@@ -31,3 +31,20 @@
     font-weight: bold;
     color: var(--error-color);
 }
+
+/* 专注模式记录样式 */
+.rating-records-table tr.focus-mode-record {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+.focus-mode-tag {
+    display: inline-block;
+    margin-left: 5px;
+    padding: 1px 4px;
+    font-size: 0.8em;
+    background-color: #e74c3c;
+    color: white;
+    border-radius: 3px;
+    font-weight: normal;
+    vertical-align: middle;
+}

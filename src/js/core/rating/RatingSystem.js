@@ -130,9 +130,10 @@ export class RatingSystem {
   /**
    * 更新玩家的等级分
    * @param {Object} gameData 游戏数据
+   * @param {boolean} focusModeBonus 是否应用专注模式加成
    * @returns {Object} 更新后的等级分信息
    */
-  updateRating(gameData) {
+  updateRating(gameData, focusModeBonus = false) {
     // 短于最小时间的游戏不计入等级分
     if (gameData.duration < this.MIN_GAME_DURATION) {
       return {
@@ -143,17 +144,28 @@ export class RatingSystem {
     }
 
     // 计算本局等级分
-    const gameRating = this.calculateGameRating(gameData);
+    let gameRating = this.calculateGameRating(gameData);
 
-    // 记录此次游戏数据
+    // 应用专注模式加成
+    if (focusModeBonus) {
+      const originalRating = gameRating;
+      gameRating = Math.round(gameRating * 1.2 * 10) / 10; // 增加20%并保留一位小数
+      console.log(
+        `[RatingSystem] 专注模式等级分加成: ${originalRating.toFixed(1)} → ${gameRating.toFixed(1)} (+20%)`
+      );
+    }
+
+    // 记录此次游戏数据，确保保存最大连击
     const record = {
       rating: gameRating,
       score: gameData.score,
       accuracy: gameData.stats.accuracy,
       cps: gameData.stats.cps,
+      maxCombo: gameData.stats.maxCombo, // 确保保存最大连击数
       duration: gameData.duration,
       date: Date.now(),
       mode: gameData.mode,
+      focusMode: focusModeBonus, // 记录是否为专注模式
     };
 
     // 更新最佳记录
@@ -174,6 +186,7 @@ export class RatingSystem {
       gameRating: gameRating,
       isNewBest:
         this.bestRecords.length > 0 && this.bestRecords[0].date === record.date,
+      focusMode: focusModeBonus, // 在返回结果中也标记专注模式
     };
 
     // 添加：触发等级分更新事件

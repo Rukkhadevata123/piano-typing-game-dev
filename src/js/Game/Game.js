@@ -39,6 +39,20 @@ export class Game {
     this.view.setGame(this);
     this.state.setStatsManager(this.statsManager);
 
+    // 设置专注模式游戏结束回调
+    this.statsManager.onFocusModeGameEnd = (reason) => {
+      console.log(
+        `[Game] 由于专注模式${reason === 'timeout' ? '超时' : '连续失误'}结束游戏`
+      );
+
+      // 获取当前统计和分数
+      const stats = this.statsManager.getStats();
+      const score = this.scoreManager.getScore();
+
+      // 调用结束游戏方法
+      this.endGame(stats, score);
+    };
+
     this.handleRestart = this.init.bind(this);
 
     // 显示当前等级分（在设置完依赖后）
@@ -191,12 +205,40 @@ export class Game {
     });
   }
 
+  /**
+   * 切换专注模式
+   * @returns {boolean} 专注模式是否开启
+   */
+  toggleFocusMode() {
+    // 如果游戏已经开始，不允许切换专注模式
+    if (this.state.isGameRunning()) {
+      console.log('[Game] 游戏进行中，无法切换专注模式');
+      return this.statsManager.focusMode; // 返回当前状态，不做更改
+    }
+
+    // 改为调用statsManager的方法，而不是state
+    const isFocusMode = this.statsManager.toggleFocusMode();
+
+    // 更新UI反馈
+    const gameTitle = document.querySelector('h1');
+    if (gameTitle) {
+      if (isFocusMode) {
+        gameTitle.style.color = '#e74c3c'; // 红色标题
+      } else {
+        gameTitle.style.color = ''; // 恢复默认颜色
+      }
+    }
+
+    return isFocusMode;
+  }
+
   // 优化命中处理函数
   handleHit(column) {
     this.board.setCell(gameConfig.rows - 1, column, 0);
 
     // 先更新统计数据，保证连击计数准确
     this.statsManager.update(true);
+    this.statsManager.recordHit();
 
     // 获取更新后的统计数据
     const stats = this.statsManager.getStats();
@@ -258,6 +300,17 @@ export class Game {
     // 播放音效
     void playSound('error');
 
+    // 更新专注模式状态，如果返回true表示游戏结束
+    const gameEndedByFocusMode = this.statsManager.recordMiss();
+    if (gameEndedByFocusMode) {
+      // 如果因专注模式失败，立即结束游戏
+      // 修复：传递必要的参数
+      const currentStats = this.statsManager.getStats();
+      const currentScore = this.scoreManager.getScore();
+      this.endGame(currentStats, currentScore);
+      return;
+    }
+
     // 特殊处理连击中断
     const hasSignificantCombo = stats.currentCombo > 5;
     const hasComboPenalty = scoreDetails.details.comboPenalty > 0;
@@ -286,6 +339,9 @@ export class Game {
         this.endGame(stats, score);
       }
     );
+
+    // 添加这一行 - 告诉 StatsManager 游戏已经开始
+    this.statsManager.startPlaying();
   }
 
   handleDrop(column) {
@@ -357,6 +413,9 @@ export class Game {
     this.state.endGame(stats, score);
     this.scoreManager.saveHighScore();
 
+    // 添加这行 - 通知 StatsManager 停止游戏
+    this.statsManager.stopPlaying();
+
     const duration = gameConfig.timeDurations[this.state.getCurrentTimeIndex()];
     this.saveGameHistory(stats, score);
 
@@ -378,9 +437,11 @@ export class Game {
       return;
     }
 
-    // 获取等级分结果
-    const ratingResult = this.ratingSystem.updateRating(gameData);
-    console.log('[Game] 等级分更新结果:', ratingResult);
+    // 获取等级分结果 - 传递statsManager中的focusMode状态
+    const ratingResult = this.ratingSystem.updateRating(
+      gameData,
+      this.statsManager.focusMode // 正确传递专注模式状态
+    );
 
     void playSound('gameOver');
     this.view.showFinalStats(stats, score, duration, ratingResult);

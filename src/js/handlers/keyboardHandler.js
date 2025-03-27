@@ -12,6 +12,16 @@ export class KeyboardHandler {
 
   handleKeyPress(event) {
     const key = event.key.toUpperCase();
+
+    // 添加F键切换专注模式
+    if (key === 'F') {
+      // 阻止默认行为，避免键入字段获取焦点影响
+      event.preventDefault();
+
+      const isFocusMode = this.game.toggleFocusMode();
+      return;
+    }
+
     if (key === 'T') {
       this.game.switchTheme();
       return;
@@ -34,6 +44,10 @@ export class KeyboardHandler {
 
     const column = keyMap[key];
     if (typeof column === 'number') {
+      // 更新最后操作时间
+      if (this.game.statsManager.focusMode) {
+        this.game.statsManager.updateLastActionTime();
+      }
       this.game.handleColumnInput(column);
     }
   }

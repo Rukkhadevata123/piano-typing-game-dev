@@ -17,6 +17,12 @@ export class TouchHandler {
     const cell = event.target;
     if (cell.classList.contains('cell') && !this.game.state.isOver()) {
       const column = parseInt(cell.dataset.col);
+
+      // 更新最后操作时间
+      if (this.game.statsManager.focusMode) {
+        this.game.statsManager.updateLastActionTime();
+      }
+
       this.game.handleColumnInput(column);
     }
   }

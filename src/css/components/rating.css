@@ -177,30 +177,6 @@
     text-shadow: 0 0 10px rgba(185, 242, 255, 0.5);
 }
 
-/* 关闭按钮 */
-.close-button {
-    display: block;
-    margin: 20px auto 0;
-    padding: 8px 20px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: bold;
-}
-
-.close-button:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-.close-button:active {
-    transform: translateY(0);
-}
-
 /* ---------- 历史记录表格样式 ---------- */
 .rating-records-table {
     width: 100%;
@@ -478,9 +454,11 @@
     display: inline-flex;
     align-items: center;
     height: 20px;
-    margin-left: auto; /* Push to right */
+    margin-left: auto;
+    /* Push to right */
     text-align: right;
-    min-width: 90px; /* Fixed width for better alignment */
+    min-width: 90px;
+    /* Fixed width for better alignment */
 }
 
 .tooltip {
