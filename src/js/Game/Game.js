@@ -410,6 +410,11 @@ export class Game {
   }
 
   endGame(stats, score) {
+    // 防止重复调用
+    if (this.state.isOver()) {
+      console.warn('[Game] 游戏已经结束，避免重复调用');
+      return;
+    }
     this.state.endGame(stats, score);
     this.scoreManager.saveHighScore();
 

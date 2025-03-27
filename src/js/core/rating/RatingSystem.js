@@ -14,6 +14,8 @@ export class RatingSystem {
 
     this.loadRating();
     this.onRatingUpdated = null; // 添加事件回调
+
+    this._isUpdating = false; // 防止重复更新
   }
 
   // 增加保存历史最佳记录的功能
@@ -134,70 +136,92 @@ export class RatingSystem {
    * @returns {Object} 更新后的等级分信息
    */
   updateRating(gameData, focusModeBonus = false) {
-    // 短于最小时间的游戏不计入等级分
-    if (gameData.duration < this.MIN_GAME_DURATION) {
-      return {
-        currentRating: this.currentRating,
-        changed: false,
-        gameRating: 0,
+    // 防止重复调用
+    if (this._isUpdating) {
+      console.warn('[RatingSystem] 已有一个评级更新进行中，避免重复操作');
+      return null;
+    }
+
+    this._isUpdating = true;
+
+    try {
+      // 短于最小时间的游戏不计入等级分
+      if (gameData.duration < this.MIN_GAME_DURATION) {
+        return {
+          currentRating: this.currentRating,
+          changed: false,
+          gameRating: 0,
+        };
+      }
+
+      // 计算本局等级分
+      let gameRating = this.calculateGameRating(gameData);
+
+      // 应用专注模式加成
+      if (focusModeBonus) {
+        const originalRating = gameRating;
+        gameRating = Math.round(gameRating * 1.2 * 10) / 10; // 增加20%并保留一位小数
+        console.log(
+          `[RatingSystem] 专注模式等级分加成: ${originalRating.toFixed(1)} → ${gameRating.toFixed(1)} (+20%)`
+        );
+      }
+
+      // 记录此次游戏数据，确保保存最大连击
+      const record = {
+        rating: gameRating,
+        score: gameData.score,
+        accuracy: gameData.stats.accuracy,
+        cps: gameData.stats.cps,
+        maxCombo: gameData.stats.maxCombo, // 确保保存最大连击数
+        duration: gameData.duration,
+        date: Date.now(),
+        mode: gameData.mode,
+        focusMode: focusModeBonus, // 记录是否为专注模式
       };
+
+      // 更新最佳记录
+      this.updateBestRecords(record);
+
+      // 重新计算总等级分 - 基于最佳记录
+      this.recalculateRating();
+
+      // 增加游戏场次
+      this.gamesPlayed++;
+
+      // 保存到本地存储
+      this.saveRating();
+
+      const result = {
+        currentRating: this.currentRating,
+        changed: true,
+        gameRating: gameRating,
+        isNewBest:
+          this.bestRecords.length > 0 &&
+          this.bestRecords[0].date === record.date,
+        focusMode: focusModeBonus, // 在返回结果中也标记专注模式
+      };
+
+      // 添加：触发等级分更新事件
+      if (this.onRatingUpdated) {
+        this.onRatingUpdated(result);
+      }
+      return result;
+    } finally {
+      this._isUpdating = false;
     }
-
-    // 计算本局等级分
-    let gameRating = this.calculateGameRating(gameData);
-
-    // 应用专注模式加成
-    if (focusModeBonus) {
-      const originalRating = gameRating;
-      gameRating = Math.round(gameRating * 1.2 * 10) / 10; // 增加20%并保留一位小数
-      console.log(
-        `[RatingSystem] 专注模式等级分加成: ${originalRating.toFixed(1)} → ${gameRating.toFixed(1)} (+20%)`
-      );
-    }
-
-    // 记录此次游戏数据，确保保存最大连击
-    const record = {
-      rating: gameRating,
-      score: gameData.score,
-      accuracy: gameData.stats.accuracy,
-      cps: gameData.stats.cps,
-      maxCombo: gameData.stats.maxCombo, // 确保保存最大连击数
-      duration: gameData.duration,
-      date: Date.now(),
-      mode: gameData.mode,
-      focusMode: focusModeBonus, // 记录是否为专注模式
-    };
-
-    // 更新最佳记录
-    this.updateBestRecords(record);
-
-    // 重新计算总等级分 - 基于最佳记录
-    this.recalculateRating();
-
-    // 增加游戏场次
-    this.gamesPlayed++;
-
-    // 保存到本地存储
-    this.saveRating();
-
-    const result = {
-      currentRating: this.currentRating,
-      changed: true,
-      gameRating: gameRating,
-      isNewBest:
-        this.bestRecords.length > 0 && this.bestRecords[0].date === record.date,
-      focusMode: focusModeBonus, // 在返回结果中也标记专注模式
-    };
-
-    // 添加：触发等级分更新事件
-    if (this.onRatingUpdated) {
-      this.onRatingUpdated(result);
-    }
-    return result;
   }
 
   // 更新最佳记录
   updateBestRecords(newRecord) {
+    // 检查是否已经有相同时间戳的记录存在
+    if (
+      this.bestRecords.some(
+        (existingRecord) => existingRecord.date === newRecord.date
+      )
+    ) {
+      console.warn('[RatingSystem] 检测到重复记录，跳过添加');
+      return;
+    }
     // 添加新记录
     this.bestRecords.push(newRecord);
 
