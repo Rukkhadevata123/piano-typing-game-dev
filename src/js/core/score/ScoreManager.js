@@ -46,9 +46,21 @@ export class ScoreManager {
     return scoreDetails;
   }
 
+  // 🔧 新增：获取当前倍率的方法（用于实时显示）
+  getCurrentMultiplier(stats, timeLeft, totalTime) {
+    // 复用ScoreCalculator的倍率计算逻辑
+    const multipliers = this.scoreCalculator.calculateMultipliers(
+      stats,
+      timeLeft,
+      totalTime
+    );
+    return parseFloat(multipliers.total);
+  }
+
   getLastScoreDetails() {
     return this.lastScoreDetails;
   }
+
   reset() {
     console.log('[ScoreManager] 重置分数');
     this.score = 0;

@@ -199,6 +199,7 @@ export class RatingSystem {
           this.bestRecords.length > 0 &&
           this.bestRecords[0].date === record.date,
         focusMode: focusModeBonus, // 在返回结果中也标记专注模式
+        level: this.calculateLevel(this.currentRating), // 🔧 添加：当前等级信息
       };
 
       // 添加：触发等级分更新事件

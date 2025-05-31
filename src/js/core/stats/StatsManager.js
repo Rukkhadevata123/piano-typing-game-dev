@@ -9,13 +9,13 @@ export class StatsManager {
     this.lastUpdateTime = null;
     this.activeTotalTime = 0; // 实际游戏时间（秒）
     this.onStatsChange = null;
-    this.onComboBreak = null; // 新增：连击中断事件
+    this.onComboBreak = null; // 连击中断事件
     this.isPlaying = false; // 游戏进行中
     this.focusMode = false; // 专注模式状态
     this.lastActionTime = Date.now(); // 最后操作时间
     this.consecutiveMisses = 0; // 连续失误次数
     this.focusCheckInterval = null; // 专注模式检查定时器
-    this.onFocusModeGameEnd = null; // 添加专注模式导致游戏结束的回调
+    this.onFocusModeGameEnd = null; // 专注模式导致游戏结束的回调
   }
 
   update(isHit) {
@@ -133,6 +133,7 @@ export class StatsManager {
   recordHit() {
     this.consecutiveMisses = 0; // 重置连续失误计数
     this.updateLastActionTime();
+    console.log('[StatsManager] 记录命中');
   }
 
   startPlaying() {
@@ -144,20 +145,8 @@ export class StatsManager {
     }
   }
 
-  // 添加一个停止游戏的方法
+  // 停止游戏
   stopPlaying() {
-    this.isPlaying = false;
-
-    // 清除专注模式检查
-    if (this.focusCheckInterval) {
-      clearInterval(this.focusCheckInterval);
-      this.focusCheckInterval = null;
-    }
-  }
-
-  // 结束游戏
-  endGame() {
-    this.gameOver = true;
     this.isPlaying = false;
 
     // 清除专注模式检查
@@ -176,17 +165,15 @@ export class StatsManager {
     this.startTime = Date.now();
     this.lastUpdateTime = null;
     this.activeTotalTime = 0;
+    this.consecutiveMisses = 0;
+
+    // 清除专注模式检查
+    if (this.focusCheckInterval) {
+      clearInterval(this.focusCheckInterval);
+      this.focusCheckInterval = null;
+    }
+
     this.onStatsChange?.();
-  }
-
-  pauseTracking() {
-    // 暂时停止时间追踪
-    this.lastUpdateTime = null;
-  }
-
-  resumeTracking() {
-    // 重新开始时间追踪
-    this.lastUpdateTime = Date.now();
   }
 
   getStats() {

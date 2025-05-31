@@ -1,23 +1,40 @@
 /**
- * 游戏核心配置
+ * 游戏核心配置 - 新架构专用
  */
 export const gameConfig = {
-  rows: 9, // 游戏板行数
-  columns: 6, // 游戏板列数
-  initialDuration: 60, // 初始游戏时长（秒）
+  // 游戏板配置
+  board: {
+    rows: 9,
+    columns: 6,
+  },
+
+  // 时间配置
+  time: {
+    initial: 60,
+    options: [60, 90, 120, 150, 180, 210, 240, 270, 300, 5],
+  },
+
+  // 得分配置
   points: {
-    hit: 10, // 命中得分
-    miss: -5, // 未命中扣分
+    hit: 10,
+    miss: -5,
   },
+
+  // 难度配置
   difficulty: {
-    minRate: 0.3, // 最小方块生成概率
-    maxRate: 0.6, // 最大方块生成概率
-    initialRate: 0.4, // 初始生成概率
-    minBlocks: 1, // 每行最少方块数
-    maxBlocks: 4, // 每行最多方块数
-    maxConsecutive: 3, // 最大连续方块数
+    generation: {
+      minRate: 0.3,
+      maxRate: 0.6,
+      initialRate: 0.4,
+    },
+    blocks: {
+      minPerRow: 1,
+      maxPerRow: 4,
+      maxConsecutive: 3,
+    },
   },
-  timeDurations: [60, 90, 120, 150, 180, 210, 240, 270, 300, 5], // 可选游戏时长（秒）
+
+  // 游戏模式
   modes: [
     { name: '整行模式', type: 'row' },
     { name: '单块模式', type: 'single' },

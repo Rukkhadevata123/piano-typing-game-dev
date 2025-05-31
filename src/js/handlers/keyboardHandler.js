@@ -1,8 +1,8 @@
 import { keyMap } from '@js/config/keyMap.js';
 
 export class KeyboardHandler {
-  constructor(game) {
-    this.game = game;
+  constructor(gameController) {
+    this.gameController = gameController;
     this.handleKeyPress = this.handleKeyPress.bind(this);
   }
 
@@ -17,38 +17,41 @@ export class KeyboardHandler {
     if (key === 'F') {
       // 阻止默认行为，避免键入字段获取焦点影响
       event.preventDefault();
-
-      const isFocusMode = this.game.toggleFocusMode();
+      this.gameController.toggleFocusMode();
       return;
     }
 
     if (key === 'T') {
-      this.game.switchTheme();
+      this.gameController.switchTheme();
       return;
     }
-    if ((key === 'Q' || key === 'R') && this.game.state.canSwitchSettings()) {
-      if (key === 'Q') this.game.switchGameTime();
-      else this.game.switchGameMode();
+
+    // Q/R键切换设置（只在非游戏状态下可用）
+    if ((key === 'Q' || key === 'R') && !this.gameController.engine.isPlaying) {
+      if (key === 'Q') this.gameController.switchGameTime();
+      else this.gameController.switchGameMode();
       return;
     }
 
     // 空格键重新开始游戏
     if (key === ' ' || key === 'SPACE') {
-      if (this.game.state.isOver()) {
-        this.game.init(); // 游戏结束状态下重新开始游戏
+      event.preventDefault();
+      if (this.gameController.engine.isGameOver) {
+        this.gameController.init(); // 游戏结束状态下重新开始游戏
         return;
       }
     }
 
-    if (this.game.state.isOver()) return;
+    // 游戏结束时不处理列输入
+    if (this.gameController.engine.isGameOver) return;
 
     const column = keyMap[key];
     if (typeof column === 'number') {
-      // 更新最后操作时间
-      if (this.game.statsManager.focusMode) {
-        this.game.statsManager.updateLastActionTime();
+      // 更新最后操作时间（专注模式）
+      if (this.gameController.engine.statsManager.focusMode) {
+        this.gameController.engine.statsManager.updateLastActionTime();
       }
-      this.game.handleColumnInput(column);
+      this.gameController.handleColumnInput(column);
     }
   }
 

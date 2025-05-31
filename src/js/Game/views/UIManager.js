@@ -1,319 +1,114 @@
 import { formatTime } from '@js/utils/timeFormat.js';
+import { safeStorage } from '@js/utils/safeStorage.js';
 
 /**
  * UI管理器 - 负责更新和管理界面元素
+ * 包含历史记录管理功能
  */
 export class UIManager {
-  constructor(game = null) {
-    this.game = game;
-    this.elements = {};
-    this.initializeElements();
+  constructor() {
+    this.elements = this._initializeElements();
+    this.restartHandler = null;
+    this.ratingSystem = null;
+
+    // 历史记录管理
+    this.MAX_HISTORY_ENTRIES = 1;
+    this.HISTORY_STORAGE_KEY = 'gameHistory';
+    this.gameHistory = safeStorage.get(this.HISTORY_STORAGE_KEY, []);
   }
 
-  initializeElements() {
-    const ids = [
-      'timer',
-      'score',
-      'accuracy',
-      'cps',
-      'combo',
-      'mode',
-      'game-over',
-      'game-container',
-      'final-duration',
-      'final-score',
-      'final-cps',
-      'final-accuracy',
-      'final-max-combo',
-      'restart-button',
-      'game-board',
-      'player-rating',
-      'rating-level',
-    ];
-
-    this.elements = ids.reduce((acc, id) => {
-      const element = document.getElementById(id);
-      if (element) {
-        acc[id.replace(/-/g, '_')] = element;
-      }
-      return acc;
-    }, {});
-
-    // 移除这里的按钮绑定，统一使用bindRatingDetailsButton方法
+  // 设置等级分系统引用
+  setRatingSystem(ratingSystem) {
+    this.ratingSystem = ratingSystem;
   }
 
-  // 后续可以设置game引用
-  setGame(game) {
-    this.game = game;
-  }
-
-  getElementById(id) {
-    const normalizedId = id.includes('_') ? id : id.replace(/-/g, '_');
-    return this.elements[normalizedId];
-  }
-
+  // 基础UI更新方法
   updateTimer(timeLeft) {
-    const element = this.getElementById('timer');
-    if (element) {
-      const formattedTime =
-        typeof timeLeft === 'number' ? formatTime(timeLeft) : timeLeft;
-      element.textContent = `剩余时间: ${formattedTime}`;
-    }
+    this._updateElement('timer', `剩余时间: ${formatTime(timeLeft)}`);
   }
 
   updateStats(stats) {
-    const elements = [
-      ['accuracy', `准确率: ${stats.accuracy}%`],
-      ['cps', `CPS: ${stats.cps}`],
-      ['combo', `连击: ${stats.currentCombo}`],
-    ];
-
-    elements.forEach(([id, text]) => {
-      const element = this.getElementById(id);
-      if (element) element.textContent = text;
-    });
+    this._updateElement('accuracy', `准确率: ${stats.accuracy}%`);
+    this._updateElement('cps', `CPS: ${stats.cps}`);
+    this._updateElement('combo', `连击: ${stats.currentCombo}`);
   }
 
   updateMode(modeText) {
-    const element = this.getElementById('mode');
-    if (element) {
-      element.textContent = `模式: ${modeText}`;
-    }
+    this._updateElement('mode', `模式: ${modeText}`);
   }
 
-  updateScore(score, details) {
-    const element = this.getElementById('score');
-    if (!element) return;
-
-    // 基础分数显示
-    element.textContent = `分数: ${score}`;
-
-    // 倍率显示增强
-    if (details && details.multipliers) {
-      const multiplierElement = this.getOrCreateMultiplierElement();
-      const multiplier = parseFloat(details.multipliers.total);
-
-      // 保存旧倍率，用于动画效果
-      const oldMultiplier = multiplierElement.dataset.value
-        ? parseFloat(multiplierElement.dataset.value)
-        : 1.0;
-
-      // 更新文本和数据属性
-      multiplierElement.textContent = `倍率: ${details.multipliers.total}×`;
-      multiplierElement.dataset.value = multiplier.toString();
-
-      // 添加动画效果
-      this.updateMultiplierVisual(multiplierElement, multiplier, oldMultiplier);
-    }
+  // 🔧 简化：移除未使用的 details 参数
+  updateScore(score) {
+    this._updateElement('score', `分数: ${score}`);
   }
 
   updateRating(ratingData) {
-    const ratingElement = this.getElementById('player-rating');
-    const levelElement = this.getElementById('rating-level');
-
-    if (ratingElement) {
-      // 保留按钮而不是覆盖整个内容
-      const detailsButton = document.getElementById('rating-details-button');
-
-      // 先清除除按钮外的内容
-      while (ratingElement.firstChild) {
-        ratingElement.removeChild(ratingElement.firstChild);
-      }
-
-      // 添加新的文本内容
-      const textNode = document.createTextNode(
-        `等级分: ${ratingData.rating.toFixed(1)} `
-      );
-      ratingElement.appendChild(textNode);
-
-      // 重新添加按钮（如果存在）或创建新按钮
-      if (detailsButton) {
-        ratingElement.appendChild(detailsButton);
-      } else {
-        const newButton = document.createElement('button');
-        newButton.id = 'rating-details-button';
-        newButton.title = '查看等级分详情';
-        newButton.textContent = 'ⓘ';
-        newButton.addEventListener('click', () =>
-          this.showPlayerRatingDetails()
-        );
-        ratingElement.appendChild(newButton);
-      }
-    }
-
-    if (levelElement) {
-      // 清除之前的所有样式类和子元素
-      levelElement.className = '';
-      while (levelElement.firstChild) {
-        levelElement.removeChild(levelElement.firstChild);
-      }
-
-      // 添加基础类
-      levelElement.className = 'rating-level';
-
-      // 设置文字
-      levelElement.textContent = ratingData.level.name;
-      levelElement.style.color = ratingData.level.color;
-
-      // 创建并添加工具提示 - 更新为正确的段位分数区间
-      const tooltip = document.createElement('div');
-      tooltip.className = 'tooltip';
-      tooltip.innerHTML = `
-      <div class="level-tooltip-title">段位排序 (由低到高)</div>
-      <div class="level-tooltip-item">
-        <span style="color:#cd7f32">●</span>
-        <span style="color:#cd7f32">青铜等级</span>
-        <span>0-5000分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#c0c0c0">●</span>
-        <span style="color:#c0c0c0">白银等级</span>
-        <span>5000-6250分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#ffd700">●</span>
-        <span style="color:#ffd700">黄金等级</span>
-        <span>6250-7500分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#0073cf">●</span>
-        <span style="color:#0073cf">蓝宝石等级</span>
-        <span>7500-8750分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#e0115f">●</span>
-        <span style="color:#e0115f">红宝石等级</span>
-        <span>8750-10000分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#50c878">●</span>
-        <span style="color:#50c878">绿宝石等级</span>
-        <span>10000-11250分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#9966cc">●</span>
-        <span style="color:#9966cc">紫水晶等级</span>
-        <span>11250-12500分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#fdeef4">●</span>
-        <span style="color:#fdeef4">珍珠等级</span>
-        <span>12500-13750分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#413839">●</span>
-        <span style="color:#413839">黑曜石等级</span>
-        <span>13750-15000分</span>
-      </div>
-      <div class="level-tooltip-item">
-        <span style="color:#b9f2ff">●</span>
-        <span style="color:#b9f2ff">钻石等级</span>
-        <span>15000分以上</span>
-      </div>
-    `;
-
-      levelElement.appendChild(tooltip);
-
-      // 特殊样式处理
-      if (ratingData.level.name === '珍珠等级') {
-        levelElement.classList.add('level-pearl');
-      } else if (ratingData.level.name === '黑曜石等级') {
-        levelElement.classList.add('level-obsidian');
-      } else if (ratingData.level.name === '钻石等级') {
-        levelElement.classList.add('level-diamond');
-      }
-    }
+    this._updateRatingDisplay(ratingData);
+    this._updateLevelDisplay(ratingData.level);
   }
 
-  getOrCreateMultiplierElement() {
-    let multiplierElement = document.getElementById('multiplier');
-    if (!multiplierElement) {
-      const scoreElement = this.getElementById('score');
-      multiplierElement = document.createElement('div');
-      multiplierElement.id = 'multiplier';
-      multiplierElement.className = 'multiplier';
-      scoreElement.parentNode.insertBefore(
-        multiplierElement,
-        scoreElement.nextSibling
-      );
-    }
-    return multiplierElement;
-  }
+  // 简化的倍率更新 - 直接使用HTML中的元素
+  updateMultiplier(multiplierValue) {
+    const element = this._getElement('multiplier');
+    if (!element) return;
 
-  updateMultiplierVisual(element, newValue, oldValue) {
-    // 根据倍率变化添加视觉反馈
-    if (newValue > oldValue + 0.1) {
-      element.classList.add('multiplier-up');
-      setTimeout(() => element.classList.remove('multiplier-up'), 500);
-    } else if (newValue < oldValue - 0.1) {
-      element.classList.add('multiplier-down');
-      setTimeout(() => element.classList.remove('multiplier-down'), 500);
-    }
+    const value = parseFloat(multiplierValue);
+    // 🔧 修改：统一保留两位小数
+    element.textContent = `倍率: ${value.toFixed(2)}×`;
+    element.style.display = 'block';
 
-    // 根据倍率设置基础颜色
-    if (newValue >= 4) {
-      element.className = 'multiplier excellent';
-    } else if (newValue >= 2.5) {
-      element.className = 'multiplier good';
+    // 🔧 优化：更丰富的视觉反馈
+    element.className = 'multiplier';
+
+    if (value >= 4) {
+      element.classList.add('excellent');
+    } else if (value >= 2.5) {
+      element.classList.add('good');
+    } else if (value >= 1.5) {
+      element.classList.add('normal');
     } else {
-      element.className = 'multiplier normal';
+      element.classList.add('low');
     }
+
+    // 🔧 新增：倍率变化动画
+    element.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      element.style.transform = 'scale(1)';
+    }, 200);
   }
 
-  showFinalStats(stats, finalScore, duration, ratingResult = null) {
-    const gameOver = this.getElementById('game-over');
-    if (!gameOver) return;
-
-    // 先设置内容再显示，避免闪烁
-    gameOver.style.display = 'block';
-    gameOver.style.visibility = 'hidden'; // 先隐藏，内容设置完再显示
-
-    const updates = {
-      final_duration: duration ? formatTime(duration) : '0s',
-      final_score: finalScore,
-      final_cps: stats.cps.toFixed(2),
-      final_accuracy: `${stats.accuracy.toFixed(2)}%`,
-      final_max_combo: stats.maxCombo,
+  // 历史记录管理
+  updateGameHistory(duration, mode, stats, score) {
+    const entry = {
+      duration,
+      mode,
+      stats,
+      score,
+      timestamp: Date.now(),
     };
 
-    Object.entries(updates).forEach(([id, value]) => {
-      const element = this.getElementById(id);
-      if (element) element.textContent = value;
-    });
+    console.log('[UIManager] 添加游戏历史记录');
+    this.gameHistory.push(entry);
 
-    // 添加等级分显示 - 使用预设容器
-    const ratingContainer = document.getElementById('rating-container');
-    if (ratingContainer && ratingResult && ratingResult.changed) {
-      // 更新等级分内容
-      const gameRatingElem = document.getElementById('game-rating');
-      const currentRatingElem = document.getElementById('current-rating');
-      const newBestContainer = document.getElementById('new-best-container');
-
-      if (gameRatingElem) {
-        gameRatingElem.textContent = ratingResult.gameRating.toFixed(1);
-      }
-
-      if (currentRatingElem) {
-        currentRatingElem.textContent = ratingResult.currentRating.toFixed(1);
-      }
-
-      if (newBestContainer) {
-        newBestContainer.style.display = ratingResult.isNewBest
-          ? 'block'
-          : 'none';
-      }
-
-      // 显示等级分容器
-      ratingContainer.style.display = 'block';
-
-      console.log('[UIManager] 显示等级分结果:', ratingResult);
-    } else if (ratingContainer) {
-      // 如果没有等级分结果，隐藏等级分容器
-      ratingContainer.style.display = 'none';
-      console.log('[UIManager] 没有等级分结果或ratingResult不存在');
-    } else {
-      console.error('[UIManager] 等级分容器不存在!');
+    // 保持最大记录数
+    if (this.gameHistory.length > this.MAX_HISTORY_ENTRIES) {
+      this.gameHistory.shift();
     }
+
+    safeStorage.set(this.HISTORY_STORAGE_KEY, this.gameHistory);
+    this._updateHistoryUI(entry);
+  }
+
+  // 游戏结束显示
+  showFinalStats(stats, finalScore, duration, ratingResult = null) {
+    const gameOver = this._getElement('game-over');
+    if (!gameOver) return;
+
+    gameOver.style.display = 'block';
+    gameOver.style.visibility = 'hidden';
+
+    this._updateFinalStats(stats, finalScore, duration);
+    this._updateRatingResult(ratingResult);
 
     requestAnimationFrame(() => {
       gameOver.style.visibility = 'visible';
@@ -321,357 +116,8 @@ export class UIManager {
     });
   }
 
-  // 添加到UIManager类中
-  showPlayerRatingDetails() {
-    console.log('[UIManager] 尝试显示等级分详情');
-
-    // 检查是否已有弹窗打开，避免重复创建
-    if (document.querySelector('.modal-overlay')) {
-      console.log('[UIManager] 弹窗已存在，避免重复创建');
-      return;
-    }
-
-    // 错误检查
-    if (!this.game || !this.game.ratingSystem) {
-      console.error('[UIManager] 无法显示等级分详情：系统未初始化');
-      return;
-    }
-
-    const ratingSystem = this.game.ratingSystem;
-    const records = ratingSystem.getBestRecords();
-
-    // 使用文档片段减少DOM重排
-    const fragment = document.createDocumentFragment();
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-
-    // 创建ESC键监听器
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') {
-        closeModal();
-      }
-    };
-
-    // 创建关闭弹窗的函数（包含清理逻辑）
-    const closeModal = () => {
-      // 移除ESC键监听器，避免内存泄露
-      document.removeEventListener('keydown', handleEsc);
-      // 添加关闭动画类
-      overlay.classList.add('closing');
-      setTimeout(() => {
-        if (document.body.contains(overlay)) {
-          document.body.removeChild(overlay);
-        }
-      }, 300); // 与CSS过渡时间匹配
-    };
-
-    // 添加点击背景关闭功能
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
-        closeModal();
-      }
-    });
-
-    const modal = document.createElement('div');
-    modal.className = 'rating-details-modal';
-    // 阻止事件冒泡，避免点击模态框时关闭
-    modal.addEventListener('click', (e) => e.stopPropagation());
-
-    // 添加标题和关闭按钮行
-    const headerRow = document.createElement('div');
-    headerRow.style.display = 'flex';
-    headerRow.style.justifyContent = 'space-between';
-    headerRow.style.alignItems = 'center';
-    headerRow.style.marginBottom = '10px';
-
-    const title = document.createElement('h2');
-    title.textContent = '玩家等级分详情';
-    headerRow.appendChild(title);
-
-    // 添加右上角X关闭按钮
-    const closeX = document.createElement('button');
-    closeX.innerHTML = '&times;';
-    closeX.style.background = 'none';
-    closeX.style.border = 'none';
-    closeX.style.fontSize = '24px';
-    closeX.style.fontWeight = 'bold';
-    closeX.style.cursor = 'pointer';
-    closeX.style.color = '#666';
-    closeX.style.padding = '0 8px';
-    closeX.style.marginLeft = 'auto';
-    closeX.onclick = () => closeModal();
-    headerRow.appendChild(closeX);
-
-    modal.appendChild(headerRow);
-
-    // 添加当前等级分和段位
-    const currentRating = document.createElement('p');
-    currentRating.className = 'current-rating';
-    const ratingData = ratingSystem.getRating();
-
-    // 为等级添加特殊类
-    let levelClassExtra = '';
-    if (ratingData.level.name.includes('珍珠')) {
-      levelClassExtra = ' level-pearl';
-    } else if (ratingData.level.name.includes('黑曜石')) {
-      levelClassExtra = ' level-obsidian';
-    } else if (ratingData.level.name.includes('钻石')) {
-      levelClassExtra = ' level-diamond';
-    }
-
-    currentRating.innerHTML = `当前等级分: <span>${ratingData.rating.toFixed(1)}</span> <span class="level-badge${levelClassExtra}" style="color:${ratingData.level.color}">${ratingData.level.name}</span>`;
-    modal.appendChild(currentRating);
-
-    // 添加游戏场次
-    const gameCount = document.createElement('p');
-    gameCount.textContent = `总游戏场次: ${ratingData.games}`;
-    modal.appendChild(gameCount);
-
-    // 添加最佳记录表格
-    if (records && records.length > 0) {
-      const table = document.createElement('table');
-      table.className = 'rating-records-table';
-
-      // 添加表头
-      const thead = document.createElement('thead');
-      thead.innerHTML = `
-        <tr>
-          <th>排名</th>
-          <th>等级分</th>
-          <th>分数</th>
-          <th>准确率</th>
-          <th>CPS</th>
-          <th>最大连击</th>
-          <th>时长</th>
-          <th>日期</th>
-        </tr>
-      `;
-      table.appendChild(thead);
-
-      // 添加表格内容
-      const tbody = document.createElement('tbody');
-      records.forEach((record, index) => {
-        const row = document.createElement('tr');
-
-        // 检查是否为专注模式记录，添加专注模式标识类
-        if (record.focusMode) {
-          row.classList.add('focus-mode-record');
-        }
-
-        const date = new Date(record.date);
-        const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-
-        // 获取最大连击数（如果存在）
-        const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
-
-        // 为专注模式添加标识
-        const focusModeIndicator = record.focusMode
-          ? '<span class="focus-mode-tag">专注</span>'
-          : '';
-
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td><strong>${record.rating.toFixed(1)}</strong>${focusModeIndicator}</td>
-          <td>${record.score}</td>
-          <td>${record.accuracy.toFixed(2)}%</td>
-          <td>${record.cps.toFixed(2)}</td>
-          <td>${maxCombo}</td>
-          <td>${record.duration}s</td>
-          <td>${dateStr}</td>
-        `;
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
-      modal.appendChild(table);
-    } else {
-      const noRecords = document.createElement('p');
-      noRecords.textContent = '暂无游戏记录';
-      modal.appendChild(noRecords);
-    }
-
-    // 按钮布局容器 - 将导出按钮和关闭按钮放在一起
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'rating-button-container';
-
-    // 修改导出数据按钮样式
-    const exportButton = document.createElement('button');
-    exportButton.className = 'modal-button export-button';
-    // 添加图标到单独的span元素
-    const exportIcon = document.createElement('span');
-    exportIcon.className = 'button-icon';
-    exportIcon.innerHTML = '📊';
-    // 添加文本到单独的span元素
-    const exportText = document.createElement('span');
-    exportText.className = 'button-text';
-    exportText.textContent = '导出记录';
-
-    exportButton.appendChild(exportIcon);
-    exportButton.appendChild(exportText);
-
-    exportButton.onclick = (e) => {
-      e.stopPropagation();
-
-      // 防止重复点击
-      if (exportButton.disabled) return;
-
-      // 添加导出状态反馈
-      exportButton.disabled = true;
-      exportText.textContent = '导出中...';
-
-      setTimeout(() => {
-        this.exportRatingData(records);
-
-        // 恢复按钮状态并显示成功提示
-        exportText.textContent = '已导出';
-        exportIcon.innerHTML = '✓';
-
-        setTimeout(() => {
-          exportText.textContent = '导出记录';
-          exportIcon.innerHTML = '📊';
-          exportButton.disabled = false;
-        }, 1500);
-      }, 300);
-    };
-
-    buttonContainer.appendChild(exportButton);
-
-    // 添加关闭按钮，样式与导出按钮一致
-    const closeButton = document.createElement('button');
-    closeButton.className = 'modal-button close-button';
-
-    // 添加图标到单独的span元素
-    const closeIcon = document.createElement('span');
-    closeIcon.className = 'button-icon';
-    closeIcon.innerHTML = '✖';
-
-    // 添加文本到单独的span元素
-    const closeText = document.createElement('span');
-    closeText.className = 'button-text';
-    closeText.textContent = '关闭';
-
-    closeButton.appendChild(closeIcon);
-    closeButton.appendChild(closeText);
-
-    closeButton.onclick = (e) => {
-      e.stopPropagation(); // 防止事件冒泡
-      closeModal();
-    };
-    buttonContainer.appendChild(closeButton);
-
-    modal.appendChild(buttonContainer);
-
-    // 添加键盘ESC关闭支持
-    document.addEventListener('keydown', handleEsc);
-
-    // 先构建DOM结构，最后一次性添加到页面
-    overlay.appendChild(modal);
-    fragment.appendChild(overlay);
-    document.body.appendChild(fragment);
-
-    // 触发动画 - 使用动画帧确保DOM更新
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        overlay.classList.add('show');
-      });
-    });
-  }
-
-  // 添加导出数据的辅助方法
-  exportRatingData(records) {
-    // 准备CSV数据
-    const headers = [
-      '排名',
-      '等级分',
-      '分数',
-      '准确率',
-      'CPS',
-      '最大连击',
-      '时长',
-      '日期',
-      '专注模式', // 添加专注模式列
-    ];
-    let csvContent = headers.join(',') + '\n';
-
-    records.forEach((record, index) => {
-      const date = new Date(record.date);
-      const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-
-      // 获取最大连击数（如果存在）
-      const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
-
-      const row = [
-        index + 1,
-        record.rating.toFixed(1),
-        record.score,
-        record.accuracy.toFixed(2) + '%',
-        record.cps.toFixed(2),
-        maxCombo,
-        record.duration + 's',
-        dateStr,
-        record.focusMode ? '是' : '否', // 添加专注模式标记
-      ];
-
-      csvContent += row.join(',') + '\n';
-    });
-
-    // 创建下载链接
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute(
-      'download',
-      `piano-game-ratings-${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  showLevelChangeAnimation(oldLevel, newLevel, isLevelUp = true) {
-    if (!oldLevel || !newLevel || oldLevel.name === newLevel.name) return;
-
-    console.log(
-      `[UIManager] 段位${isLevelUp ? '晋升' : '下降'}: ${oldLevel.name} -> ${newLevel.name}`
-    );
-
-    const container = document.createElement('div');
-    container.className = 'level-change-animation';
-
-    // 根据是晋升还是下降添加不同的类名
-    if (!isLevelUp) {
-      container.classList.add('level-down');
-    }
-
-    container.innerHTML = `
-      <div class="level-change-content">
-        <div class="level-change-title">${isLevelUp ? '段位晋升' : '段位下降'}</div>
-        <div class="level-change-from" style="color:${oldLevel.color}">${oldLevel.name}</div>
-        <div class="level-change-arrow">${isLevelUp ? '⟹' : '⟾'}</div>
-        <div class="level-change-to" style="color:${newLevel.color}">${newLevel.name}</div>
-        ${!isLevelUp ? '<div class="level-down-message">继续努力，相信你能重回巅峰！</div>' : ''}
-      </div>
-    `;
-
-    document.body.appendChild(container);
-
-    // 添加进入动画
-    setTimeout(() => container.classList.add('show'), 100);
-
-    // 一段时间后移除
-    setTimeout(() => {
-      container.classList.remove('show');
-      setTimeout(() => {
-        if (document.body.contains(container)) {
-          document.body.removeChild(container);
-        }
-      }, 1000);
-    }, 4000);
-  }
-
   hideGameOver() {
-    const gameOver = this.getElementById('game-over');
+    const gameOver = this._getElement('game-over');
     if (!gameOver) return;
 
     gameOver.classList.remove('show');
@@ -679,14 +125,15 @@ export class UIManager {
   }
 
   markGameAsLoaded() {
-    const container = this.getElementById('game-container');
+    const container = this._getElement('game-container');
     if (container) {
       container.classList.add('loaded');
     }
   }
 
+  // 按钮绑定
   bindRestartButton(handler) {
-    const button = this.getElementById('restart-button');
+    const button = this._getElement('restart-button');
     if (!button) return;
 
     this.unbindRestartButton();
@@ -699,37 +146,428 @@ export class UIManager {
     button.addEventListener('click', this.restartHandler);
   }
 
-  // 添加到UIManager类中
-  bindRatingDetailsButton() {
-    const ratingDetailsButton = document.getElementById(
-      'rating-details-button'
-    );
-    if (!ratingDetailsButton) return;
-
-    // 移除旧的监听器（使用克隆替换方式）
-    const newButton = ratingDetailsButton.cloneNode(true);
-    if (ratingDetailsButton.parentNode) {
-      ratingDetailsButton.parentNode.replaceChild(
-        newButton,
-        ratingDetailsButton
-      );
-    }
-
-    // 添加新的事件监听器
-    newButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.showPlayerRatingDetails();
-    });
-
-    return newButton; // 返回按钮实例，便于外部使用
-  }
-
   unbindRestartButton() {
-    const button = this.getElementById('restart-button');
+    const button = this._getElement('restart-button');
     if (button && this.restartHandler) {
       button.removeEventListener('click', this.restartHandler);
       this.restartHandler = null;
     }
+  }
+
+  // 动画效果
+  showLevelChangeAnimation(oldLevel, newLevel, isLevelUp = true) {
+    const container = document.createElement('div');
+    container.className = `level-change-animation ${isLevelUp ? '' : 'level-down'}`;
+
+    container.innerHTML = `
+      <div class="level-change-content">
+        <div class="level-change-title">${isLevelUp ? '段位晋升' : '段位下降'}</div>
+        <div class="level-change-from" style="color:${oldLevel.color}">${oldLevel.name}</div>
+        <div class="level-change-arrow">${isLevelUp ? '⟹' : '⟾'}</div>
+        <div class="level-change-to" style="color:${newLevel.color}">${newLevel.name}</div>
+        ${!isLevelUp ? '<div class="level-down-message">继续努力，相信你能重回巅峰！</div>' : ''}
+      </div>
+    `;
+
+    document.body.appendChild(container);
+    setTimeout(() => container.classList.add('show'), 100);
+    setTimeout(() => {
+      container.classList.remove('show');
+      setTimeout(() => document.body.removeChild(container), 1000);
+    }, 4000);
+  }
+
+  // 私有方法
+  _initializeElements() {
+    // 🔧 更新：添加新的预定义元素
+    const ids = [
+      'timer',
+      'score',
+      'accuracy',
+      'cps',
+      'combo',
+      'mode',
+      'multiplier',
+      'game-over',
+      'game-container',
+      'final-duration',
+      'final-score',
+      'final-cps',
+      'final-accuracy',
+      'final-max-combo',
+      'restart-button',
+      'game-board',
+      'player-rating',
+      'rating-level',
+      'notification-container',
+      'combo-milestone-container',
+    ];
+
+    return ids.reduce((acc, id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        acc[id.replace(/-/g, '_')] = element;
+      }
+      return acc;
+    }, {});
+  }
+
+  _getElement(id) {
+    const normalizedId = id.includes('_') ? id : id.replace(/-/g, '_');
+    return this.elements[normalizedId];
+  }
+
+  _updateElement(id, content) {
+    const element = this._getElement(id);
+    if (element) {
+      element.textContent = content;
+    }
+  }
+
+  _updateHistoryUI(entry) {
+    const container = document.getElementById('history-stats');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.className = 'history-entry';
+    div.innerHTML = `
+      <div class="history-header">
+        <span>时长: ${formatTime(entry.duration)}</span>
+        <span>模式: ${entry.mode === 'row' ? '整行' : '单块'}</span>
+      </div>
+      <div>得分: ${entry.score}</div>
+      <div>CPS: ${entry.stats.cps}</div>
+      <div>准确率: ${entry.stats.accuracy}%</div>
+      <div>最大连击: ${entry.stats.maxCombo}</div>
+    `;
+
+    // 维护最大显示数量
+    while (container.children.length >= this.MAX_HISTORY_ENTRIES) {
+      container.removeChild(container.firstChild);
+    }
+
+    container.appendChild(div);
+  }
+
+  _updateRatingDisplay(ratingData) {
+    const ratingElement = this._getElement('player-rating');
+    if (!ratingElement) return;
+
+    // 清除内容并重建
+    ratingElement.innerHTML = `
+      等级分: ${ratingData.rating.toFixed(1)} 
+      <button id="rating-details-button" title="查看等级分详情">ⓘ</button>
+    `;
+
+    // 重新绑定按钮事件
+    this._bindRatingDetailsButton();
+  }
+
+  _updateLevelDisplay(level) {
+    const levelElement = this._getElement('rating-level');
+    if (!levelElement) return;
+
+    levelElement.className = 'rating-level';
+    levelElement.textContent = level.name;
+    levelElement.style.color = level.color;
+
+    // 添加特殊样式
+    if (level.name.includes('珍珠')) levelElement.classList.add('level-pearl');
+    else if (level.name.includes('黑曜石'))
+      levelElement.classList.add('level-obsidian');
+    else if (level.name.includes('钻石'))
+      levelElement.classList.add('level-diamond');
+  }
+
+  _updateFinalStats(stats, finalScore, duration) {
+    const updates = {
+      final_duration: formatTime(duration),
+      final_score: finalScore,
+      final_cps: stats.cps.toFixed(2),
+      final_accuracy: `${stats.accuracy.toFixed(2)}%`,
+      final_max_combo: stats.maxCombo,
+    };
+
+    Object.entries(updates).forEach(([id, value]) => {
+      this._updateElement(id, value);
+    });
+  }
+
+  _updateRatingResult(ratingResult) {
+    const ratingContainer = document.getElementById('rating-container');
+    if (!ratingContainer || !ratingResult?.changed) {
+      if (ratingContainer) ratingContainer.style.display = 'none';
+      return;
+    }
+
+    // 更新等级分结果显示
+    this._updateElement('game-rating', ratingResult.gameRating.toFixed(1));
+    this._updateElement(
+      'current-rating',
+      ratingResult.currentRating.toFixed(1)
+    );
+
+    const newBestContainer = document.getElementById('new-best-container');
+    if (newBestContainer) {
+      newBestContainer.style.display = ratingResult.isNewBest
+        ? 'block'
+        : 'none';
+    }
+
+    ratingContainer.style.display = 'block';
+  }
+
+  _bindRatingDetailsButton() {
+    const button = document.getElementById('rating-details-button');
+    if (!button) return;
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this._showRatingDetails();
+    });
+  }
+
+  _showRatingDetails() {
+    // 检查等级分系统是否可用
+    if (!this.ratingSystem) {
+      console.error('[UIManager] 等级分系统未初始化');
+      this._showErrorModal('等级分系统未初始化，请刷新页面重试。');
+      return;
+    }
+
+    // 检查是否已有弹窗打开
+    if (document.querySelector('.modal-overlay')) {
+      console.log('[UIManager] 弹窗已存在，避免重复创建');
+      return;
+    }
+
+    const ratingData = this.ratingSystem.getRating();
+    const records = this.ratingSystem.getBestRecords();
+
+    this._createRatingModal(ratingData, records);
+  }
+
+  _createRatingModal(ratingData, records) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    // ESC键关闭功能
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+
+    const closeModal = () => {
+      document.removeEventListener('keydown', handleEsc);
+      overlay.classList.add('closing');
+      setTimeout(() => {
+        if (document.body.contains(overlay)) {
+          document.body.removeChild(overlay);
+        }
+      }, 300);
+    };
+
+    // 点击背景关闭
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    const modal = document.createElement('div');
+    modal.className = 'rating-details-modal';
+    modal.addEventListener('click', (e) => e.stopPropagation());
+
+    // 🔧 修改：优化模态框布局
+    modal.innerHTML = `
+    <div class="modal-header">
+      <h2>玩家等级分详情</h2>
+      <button class="modal-close" title="关闭">&times;</button>
+    </div>
+    <div class="modal-content">
+      <div class="current-rating">
+        当前等级分: <span>${ratingData.rating.toFixed(1)}</span> 
+        <span class="level-badge" style="color:${ratingData.level.color}">${ratingData.level.name}</span>
+      </div>
+      <div class="game-count">总游戏场次: ${ratingData.games}</div>
+      ${this._createRecordsTable(records)}
+    </div>
+    <div class="modal-footer">
+      <button class="modal-button export-button">
+        <span class="button-icon">📊</span>
+        <span class="button-text">导出记录</span>
+      </button>
+      <button class="modal-button close-button">
+        <span class="button-icon">✖</span>
+        <span class="button-text">关闭</span>
+      </button>
+    </div>
+  `;
+
+    // 绑定事件
+    modal.querySelector('.modal-close').onclick = closeModal;
+    modal.querySelector('.close-button').onclick = closeModal;
+
+    const exportButton = modal.querySelector('.export-button');
+    exportButton.onclick = () => this._exportRatingData(records, exportButton);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // 添加键盘支持
+    document.addEventListener('keydown', handleEsc);
+
+    // 触发显示动画
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        overlay.classList.add('show');
+      });
+    });
+  }
+
+  _createRecordsTable(records) {
+    if (!records || records.length === 0) {
+      return '<div class="no-records">暂无游戏记录</div>';
+    }
+
+    const tableRows = records
+      .map((record, index) => {
+        const date = new Date(record.date);
+        const dateStr = `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+        const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
+        const focusTag = record.focusMode
+          ? '<span class="focus-mode-tag">专注</span>'
+          : '';
+
+        return `
+        <tr ${record.focusMode ? 'class="focus-mode-record"' : ''}>
+          <td>${index + 1}</td>
+          <td><strong>${record.rating.toFixed(1)}</strong>${focusTag}</td>
+          <td>${record.score}</td>
+          <td>${record.accuracy.toFixed(2)}%</td>
+          <td>${record.cps.toFixed(2)}</td>
+          <td>${maxCombo}</td>
+          <td>${record.duration}s</td>
+          <td>${dateStr}</td>
+        </tr>
+      `;
+      })
+      .join('');
+
+    return `
+      <table class="rating-records-table">
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>等级分</th>
+            <th>分数</th>
+            <th>准确率</th>
+            <th>CPS</th>
+            <th>最大连击</th>
+            <th>时长</th>
+            <th>日期</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    `;
+  }
+
+  _exportRatingData(records, button) {
+    if (button.disabled) return;
+
+    button.disabled = true;
+    const textSpan = button.querySelector('.button-text');
+    const iconSpan = button.querySelector('.button-icon');
+
+    textSpan.textContent = '导出中...';
+
+    setTimeout(() => {
+      // 准备CSV数据
+      const headers = [
+        '排名',
+        '等级分',
+        '分数',
+        '准确率',
+        'CPS',
+        '最大连击',
+        '时长',
+        '日期',
+        '专注模式',
+      ];
+      let csvContent = headers.join(',') + '\n';
+
+      records.forEach((record, index) => {
+        const date = new Date(record.date);
+        const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        const maxCombo = record.maxCombo || record.stats?.maxCombo || '-';
+
+        const row = [
+          index + 1,
+          record.rating.toFixed(1),
+          record.score,
+          record.accuracy.toFixed(2) + '%',
+          record.cps.toFixed(2),
+          maxCombo,
+          record.duration + 's',
+          dateStr,
+          record.focusMode ? '是' : '否',
+        ];
+
+        csvContent += row.join(',') + '\n';
+      });
+
+      // 创建下载
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `piano-game-ratings-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 成功反馈
+      textSpan.textContent = '已导出';
+      iconSpan.innerHTML = '✓';
+
+      setTimeout(() => {
+        textSpan.textContent = '导出记录';
+        iconSpan.innerHTML = '📊';
+        button.disabled = false;
+      }, 1500);
+    }, 300);
+  }
+
+  _showErrorModal(message) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    overlay.innerHTML = `
+      <div class="rating-details-modal error-modal">
+        <div class="modal-header">
+          <h2>错误</h2>
+        </div>
+        <div class="modal-content">
+          <p>${message}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-button close-button">
+            <span class="button-text">确定</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    overlay.querySelector('.close-button').onclick = () => {
+      document.body.removeChild(overlay);
+    };
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.classList.add('show');
+    });
   }
 }

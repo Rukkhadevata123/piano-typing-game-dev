@@ -1,10 +1,10 @@
 /**
  * 通知系统 - 负责显示各类游戏通知
+ * 合并原 notifications.js 和 NotificationSystem.js
  */
 export class NotificationSystem {
   /**
    * 通用通知显示函数
-   * @param {Object} options 配置选项
    */
   showNotification(options) {
     const {
@@ -25,6 +25,7 @@ export class NotificationSystem {
       container.className = containerClass;
       document.body.appendChild(container);
     }
+
     // 2. 创建通知元素
     const notification = document.createElement('div');
     notification.className = className;
@@ -46,13 +47,57 @@ export class NotificationSystem {
     requestAnimationFrame(() => {
       notification.classList.add(animateClass);
       setTimeout(() => {
-        notification.remove();
+        if (notification.parentNode) {
+          notification.remove();
+        }
       }, duration);
     });
 
     return notification;
   }
 
+  // 🎨 主题/模式/时间切换通知
+  showTheme(themeName) {
+    this.showNotification({
+      containerId: 'theme-notification-container',
+      containerClass: 'theme-notification-container',
+      className: 'theme-notification',
+      content: `主题: ${themeName}`,
+      duration: 1500,
+    });
+  }
+
+  showTime(timeText) {
+    this.showNotification({
+      containerId: 'theme-notification-container',
+      containerClass: 'theme-notification-container',
+      className: 'theme-notification',
+      content: `游戏时长: ${timeText}`,
+      duration: 1500,
+    });
+  }
+
+  showMode(modeName) {
+    this.showNotification({
+      containerId: 'theme-notification-container',
+      containerClass: 'theme-notification-container',
+      className: 'theme-notification',
+      content: `游戏模式: ${modeName}`,
+      duration: 1500,
+    });
+  }
+
+  showFocusMode(isEnabled) {
+    this.showNotification({
+      containerId: 'theme-notification-container',
+      containerClass: 'theme-notification-container',
+      className: `theme-notification ${isEnabled ? 'focus-enabled' : 'focus-disabled'}`,
+      content: `专注模式: ${isEnabled ? '开启' : '关闭'}`,
+      duration: 1500,
+    });
+  }
+
+  // 🎯 游戏反馈通知
   showScoreFeedback(
     scoreDetails,
     column = null,
@@ -129,7 +174,6 @@ export class NotificationSystem {
       className: `combo-milestone level-${level}`,
       content: `🔥连击 ${combo} 奖励 +${points}`,
       duration: 3500,
-      // 使用comboEffect动画
       animateClass: 'show',
     });
   }
@@ -141,7 +185,6 @@ export class NotificationSystem {
       className: 'combo-milestone combo-break',
       content: `💔连击中断 ${combo} 惩罚 -${penalty}`,
       duration: 2500,
-      // 使用 'show' 类触发动画
       animateClass: 'show',
     });
   }

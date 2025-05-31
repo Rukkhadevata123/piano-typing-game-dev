@@ -15,14 +15,16 @@ export class ThemeManager {
 
   applyCurrentTheme() {
     const theme = themes[this.currentThemeIndex];
-    document.documentElement.style.setProperty(
-      '--primary-color',
-      theme.color || theme.colors[0]
-    );
+    const primaryColor = theme.color || theme.colors[0];
+
+    // 🔧 同时设置所有相关的CSS变量
+    document.documentElement.style.setProperty('--primary-color', primaryColor);
     document.documentElement.style.setProperty(
       '--secondary-color',
       theme.secondary
     );
+    document.documentElement.style.setProperty('--cell-color', primaryColor); // 🆕 添加这行
+
     return theme;
   }
 

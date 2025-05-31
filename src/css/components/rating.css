@@ -69,70 +69,184 @@
     box-shadow: 0 0 15px rgba(185, 242, 255, 0.5);
 }
 
-/* ---------- 等级分详情弹窗 ---------- */
+/* ---------- 等级分详情弹窗优化样式 ---------- */
+/* 模态框结构样式 */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
-    align-items: center;
     justify-content: center;
-    backdrop-filter: blur(3px);
+    align-items: center;
+    z-index: 1000;
     opacity: 0;
-    transform: translateZ(0);
-    /* 强制GPU加速 */
-    will-change: opacity;
-    /* 提示浏览器这个属性会变化 */
-    transition: opacity 0.3s ease;
+    visibility: hidden;
+    transition: all 0.3s ease;
 }
 
 .modal-overlay.show {
     opacity: 1;
-}
-
-.modal-overlay.closing {
-    opacity: 0;
+    visibility: visible;
 }
 
 .rating-details-modal {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 8px;
-    padding: 20px;
-    width: 80%;
-    max-width: 800px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    color: #333;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transform: translateY(20px) translateZ(0);
-    /* 添加translateZ强制GPU加速 */
-    opacity: 0;
-    will-change: transform, opacity;
-    /* 提示浏览器这些属性会变化 */
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    background: #2c3e50;
+    border-radius: 12px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
 }
 
 .modal-overlay.show .rating-details-modal {
-    transform: translateY(0);
-    opacity: 1;
+    transform: scale(1);
 }
 
-.modal-overlay.closing .rating-details-modal {
-    transform: translateY(20px);
-    opacity: 0;
+/* 模态框头部布局 */
+.modal-header {
+    background: #34495e;
+    padding: 20px;
+    position: relative;
+    border-bottom: 1px solid #4a5f7a;
 }
 
-/* 弹窗内标题 */
-.rating-details-modal h2 {
-    margin-top: 0;
-    color: var(--primary-color);
-    text-align: center;
+.modal-header h2 {
+    margin: 0;
+    color: #ecf0f1;
+    font-size: 1.5em;
+    padding-right: 40px;
+}
+
+/* 右上角关闭按钮 */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    font-size: 28px;
     font-weight: bold;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background-color: #e74c3c;
+    color: white;
+    transform: scale(1.1);
+}
+
+.modal-content {
+    padding: 20px;
+    color: #ecf0f1;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* 底部按钮容器布局 */
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #4a5f7a;
+    background: #34495e;
+    display: flex;
+    gap: 12px;
+    justify-content: stretch;
+}
+
+/* 模态框按钮样式 */
+.modal-button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* 导出按钮样式 */
+.export-button {
+    background: #3498db;
+    color: white;
+}
+
+.export-button:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+/* 关闭按钮样式 */
+.close-button {
+    background: #95a5a6;
+    color: white;
+}
+
+.close-button:hover:not(:disabled) {
+    background: #7f8c8d;
+}
+
+/* 按钮图标和文字 */
+.button-icon {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-text {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .modal-button {
+        flex: none;
+    }
+
+    .rating-details-modal {
+        margin: 20px;
+        max-width: calc(100vw - 40px);
+    }
 }
 
 /* 当前等级分显示 */
@@ -145,6 +259,14 @@
 .current-rating span {
     color: var(--primary-color);
     font-weight: bold;
+}
+
+/* 游戏计数显示 */
+.game-count {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1em;
+    color: #bdc3c7;
 }
 
 /* 段位标识公共样式 */
@@ -201,6 +323,29 @@
 
 .rating-records-table td {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 暂无记录提示 */
+.no-records {
+    text-align: center;
+    color: #95a5a6;
+    font-style: italic;
+    padding: 40px 20px;
+    font-size: 1.1em;
+}
+
+/* 专注模式标识 */
+.focus-mode-tag {
+    background: #e74c3c;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+.focus-mode-record {
+    background-color: rgba(231, 76, 60, 0.1);
 }
 
 /* 金银铜前三名样式 */

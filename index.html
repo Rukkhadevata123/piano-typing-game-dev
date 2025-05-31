@@ -10,7 +10,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="一个基于键盘按键的音游模拟游戏" />
   <title>6K音游模拟器</title>
-  <!-- 路径保持相对形式，Vite 会根据 base 处理 -->
   <link href="/css/style.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -40,6 +39,8 @@
       <aside class="game-stats">
         <div id="stats-container">
           <div id="score">分数: 0</div>
+          <!-- 预先定义倍率显示元素 -->
+          <div id="multiplier" class="multiplier" style="display: none;">倍率: 1.0×</div>
           <div id="timer">剩余时间: 60</div>
           <div id="mode">模式: 整行</div>
           <div id="accuracy">准确率: 100%</div>
@@ -59,6 +60,7 @@
         </div>
       </aside>
       <main id="game-board"></main>
+      <!-- 预先定义组合里程碑容器 -->
       <div id="combo-milestone-container" class="combo-milestone-container"></div>
     </div>
     <div id="game-over" class="overlay">
@@ -82,18 +84,23 @@
         <button id="restart-button">重新开始 <span class="key-hint">[空格]</span></button>
       </div>
     </div>
+    
+    <!-- 预先定义通知容器 -->
+    <div id="notification-container" class="notification-container"></div>
   </div>
+  
   <div class="loading-container" id="loading">
     <div class="loading-spinner"></div>
     <div class="loading-text">加载中...</div>
   </div>
   <div id="error-container"></div>
+  
   <footer class="game-footer">
     <a href="https://github.com/Rukkhadevata123/piano-typing-game-dev" target="_blank" rel="noopener noreferrer">
       <img src="https://img.shields.io/badge/GitHub-查看源码-black?style=flat-square&logo=github" alt="GitHub repository">
     </a>
   </footer>
-  <!-- 脚本路径保持一致 -->
+  
   <script src="/js/main.js" type="module"></script>
 </body>
 

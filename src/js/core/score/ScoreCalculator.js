@@ -75,6 +75,7 @@ export class ScoreCalculator {
       details: {
         comboPenalty: details.comboPenalty,
         milestoneBonus: details.milestoneBonus,
+        multiplier: multipliers.total, // 🔧 添加：为UI显示提供原始倍率值
       },
     };
   }

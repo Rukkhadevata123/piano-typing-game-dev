@@ -5,8 +5,8 @@ import { gameConfig } from '@js/config/gameConfig.js';
 
 export class Board {
   constructor(difficultyManager) {
-    this.rows = gameConfig.rows;
-    this.columns = gameConfig.columns;
+    this.rows = gameConfig.board.rows;
+    this.columns = gameConfig.board.columns;
     this.board = [];
     this.difficultyManager = difficultyManager;
   }
@@ -21,16 +21,17 @@ export class Board {
     let row;
     do {
       row = Array.from({ length: this.columns }, () =>
-        Math.random() < this.difficultyManager.getCurrentDifficulty() ? 1 : 0
+        Math.random() < this.difficultyManager.getCurrentRate() ? 1 : 0
       );
     } while (!this.isValidRow(row));
     return row;
   }
 
   isValidRow(row) {
-    const { minBlocks, maxBlocks, maxConsecutive } = gameConfig.difficulty;
+    const { minPerRow, maxPerRow, maxConsecutive } =
+      gameConfig.difficulty.blocks;
     const totalBlocks = row.filter((cell) => cell === 1).length;
-    if (totalBlocks < minBlocks || totalBlocks > maxBlocks) return false;
+    if (totalBlocks < minPerRow || totalBlocks > maxPerRow) return false;
 
     let consecutive = 0;
     for (let cell of row) {
@@ -59,7 +60,7 @@ export class Board {
       this.board[row + 1][column] = this.board[row][column];
     }
     this.board[0][column] =
-      Math.random() < this.difficultyManager.getCurrentDifficulty() ? 1 : 0;
+      Math.random() < this.difficultyManager.getCurrentRate() ? 1 : 0;
     while (this.checkEmptyRow()) {
       this.dropAllRows();
     }
@@ -71,16 +72,17 @@ export class Board {
   }
 
   getCell(row, column) {
+    if (row < 0 || row >= this.rows || column < 0 || column >= this.columns) {
+      return 0;
+    }
     return this.board[row][column];
   }
 
   setCell(row, column, value) {
-    this.board[row][column] = value;
+    if (row >= 0 && row < this.rows && column >= 0 && column < this.columns) {
+      this.board[row][column] = value;
+    }
   }
-
-  // getBoard() {
-  //   return this.board;
-  // }
 
   // 新增：为 GameView 提供渲染数据
   getRenderData() {
