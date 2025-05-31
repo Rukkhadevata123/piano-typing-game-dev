@@ -1,37 +1,261 @@
 /**
- * 通知提示样式
- * 包含：主题切换提示、动画效果
+ * 通知系统样式
  */
 
-/* 主题通知 */
-.theme-notification {
+/* === 系统通知容器 === */
+.system-notification-container {
     position: fixed;
-    top: var(--spacing);
-    right: var(--spacing);
-    padding: var(--spacing-small) var(--spacing);
-
-    /* 视觉样式 */
-    background: var(--overlay-background);
-    color: white;
-    border-radius: var(--border-radius);
-    z-index: var(--z-index-overlay);
-
-    /* 动画效果 */
-    animation: fadeInOut 1.5s ease-in-out;
+    top: 20px;
+    right: 20px;
+    z-index: calc(var(--z-index-overlay) + 10);
+    pointer-events: none;
 }
 
-/* 通知动画 */
-@keyframes fadeInOut {
+/* === 系统通知样式 === */
+.system-notification {
+    background: var(--overlay-background);
+    color: white;
+    padding: var(--spacing-small) var(--spacing);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-small);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    text-align: center;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all var(--duration-normal) var(--animation-timing);
+}
 
-    0%,
-    100% {
+.system-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* === 不同类型通知的颜色 === */
+.time-notification {
+    border-left: 4px solid var(--primary-color);
+}
+
+.mode-notification {
+    border-left: 4px solid var(--accent);
+}
+
+.theme-notification {
+    border-left: 4px solid var(--success);
+}
+
+/* === 专注模式通知 - 区分开启/关闭状态 === */
+.focus-mode-notification {
+    border-left: 4px solid var(--error-color);
+    /* 默认样式，将被具体状态覆盖 */
+}
+
+/* 专注模式开启 - 橙红色，表示高度专注 */
+.focus-mode-notification.focus-enabled {
+    border-left: 4px solid #ff6b35;
+    background: linear-gradient(135deg,
+            rgba(255, 107, 53, 0.9) 0%,
+            rgba(255, 69, 0, 0.9) 100%);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+/* 专注模式关闭 - 蓝绿色，表示放松状态 */
+.focus-mode-notification.focus-disabled {
+    border-left: 4px solid #00bcd4;
+    background: linear-gradient(135deg,
+            rgba(0, 188, 212, 0.9) 0%,
+            rgba(0, 150, 136, 0.9) 100%);
+    box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+}
+
+/* === 分数反馈容器 === */
+.score-feedback-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: calc(var(--z-index-overlay) + 5);
+}
+
+/* === 分数弹窗样式 === */
+.score-popup {
+    position: absolute;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all var(--duration-normal) ease;
+    pointer-events: none;
+}
+
+.score-popup.positive {
+    color: var(--success);
+}
+
+.score-popup.negative {
+    color: var(--error-color);
+}
+
+.score-popup.animate {
+    animation: scorePopup 1s ease forwards;
+}
+
+.score-popup.animate-score {
+    animation: scoreMiss 0.8s ease forwards;
+}
+
+/* === 连击里程碑容器 === */
+.combo-milestone-container {
+    position: fixed;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: calc(var(--z-index-overlay) + 8);
+    pointer-events: none;
+}
+
+/* === 连击里程碑样式 === */
+.combo-milestone {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: var(--spacing) var(--spacing-large);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    text-align: center;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: var(--spacing-small);
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+    transition: all var(--duration-normal) var(--animation-timing);
+}
+
+.combo-milestone.show {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    animation: comboEffect 3.5s ease forwards;
+}
+
+.combo-milestone.combo-break {
+    background: linear-gradient(45deg, var(--error-color), #c0392b);
+    animation: comboBreak 2.5s ease forwards;
+}
+
+/* === 连击等级样式 === */
+.combo-milestone.level-2 {
+    background: linear-gradient(45deg, var(--accent), #e67e22);
+    font-size: 1.3em;
+}
+
+.combo-milestone.level-3 {
+    background: linear-gradient(45deg, var(--success), #27ae60);
+    font-size: 1.4em;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.combo-milestone.level-4 {
+    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+    font-size: 1.5em;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(155, 89, 182, 0.5);
+}
+
+/* === 动画定义 === */
+@keyframes scorePopup {
+    0% {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(20px) scale(0.8);
     }
 
-    20%,
+    30% {
+        opacity: 1;
+        transform: translateY(-30px) scale(1.1);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateY(-40px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.9);
+    }
+}
+
+@keyframes scoreMiss {
+    0% {
+        opacity: 0;
+        transform: translateX(0) scale(0.8);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateX(20px) scale(1.1);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateX(15px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.9);
+    }
+}
+
+@keyframes comboEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+
+    20% {
+        opacity: 1;
+        transform: scale(1.1) translateY(0);
+    }
+
+    30% {
+        transform: scale(1) translateY(0);
+    }
+
     80% {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+    }
+}
+
+@keyframes comboBreak {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+
+    20% {
+        opacity: 1;
+        transform: scale(1.1) translateY(0);
+    }
+
+    30% {
+        transform: scale(1) translateY(0);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
     }
 }

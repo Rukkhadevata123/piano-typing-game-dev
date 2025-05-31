@@ -1,27 +1,18 @@
 /**
- * 响应式布局样式
- * 包含：桌面端、平板、移动端适配
+ * 响应式布局样式 - 紧凑版本
  */
 
-/* 桌面端和横屏布局 */
+/* 桌面端默认布局 */
 .game-area {
     display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: var(--grid-gap);
-    margin: 20px 0;
-    max-width: var(--max-width);
-    padding: 0 20px;
-}
-
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(6, var(--cell-size));
-    gap: var(--grid-gap);
-    margin: 0 auto;
-    padding: var(--spacing);
-    background: var(--board-background);
-    border-radius: var(--border-radius);
-    max-width: 600px;
+    grid-template-columns: 180px 1fr;
+    /* 减小左侧宽度 */
+    gap: var(--spacing-small);
+    margin: var(--spacing) 0;
+    align-items: start;
+    justify-items: center;
+    /* 棋盘居中 */
+    width: 100%;
 }
 
 /* 小屏幕横屏优化 - 低于500px高度 */
@@ -29,15 +20,63 @@
     #game-container {
         padding: var(--spacing-small);
         margin: 0;
+        min-width: 550px;
+        /* 进一步减小 */
     }
 
     .game-area {
+        margin: var(--spacing-small) 0;
+        gap: var(--spacing-small);
+        grid-template-columns: 160px 1fr;
+        /* 进一步减小左侧宽度 */
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: var(--spacing-small);
+    }
+}
+
+/* 平板适配 */
+@media (max-width: 1024px) {
+    #game-container {
+        min-width: 550px;
+    }
+
+    .game-area {
+        grid-template-columns: 160px 1fr;
+        gap: var(--spacing-small);
+    }
+
+    #game-board {
+        --cell-size: 50px;
+        --grid-gap: 4px;
+    }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    #game-container {
+        min-width: auto;
+        width: 95%;
+    }
+
+    .game-area {
+        grid-template-columns: 1fr;
+        gap: var(--spacing);
         padding: 0 var(--spacing-small);
     }
 
     #game-board {
         --cell-size: 45px;
         --grid-gap: 4px;
+        order: 1;
+        justify-self: center;
+    }
+
+    .game-stats {
+        order: 2;
+        width: 100%;
     }
 
     #stats-container>div {
@@ -65,7 +104,7 @@
 }
 
 /* 强制横屏提示 */
-@media (orientation: portrait) {
+@media (orientation: portrait) and (max-width: 768px) {
     #game-container::before {
         content: "请横屏以获得最佳游戏体验";
         position: fixed;

@@ -1,30 +1,35 @@
 /**
- * 历史记录样式
- * 包含：记录列表、条目样式
+ * 历史记录样式 - 紧凑优化版本
  */
 
-/* 历史记录容器 */
-#history-container {
-    padding: var(--spacing);
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-light);
-}
-
-/* 标题样式 */
-#history-container h3 {
-    margin: 0 0 var(--spacing-small) 0;
-    color: var(--text-color);
-}
-
-/* 记录条目 */
+/* 历史记录条目 */
 .history-entry {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-small);
-    padding: var(--spacing-small);
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    /* 减小间距 */
+    padding: 6px 8px;
+    /* 减小内边距 */
     border-bottom: 1px solid var(--border-color);
-    font-size: var(--font-size-small);
+    font-size: 0.9em;
+    /* 稍微减小字体 */
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    /* 减小圆角 */
+    margin-bottom: 4px;
+    /* 减小边距 */
+    line-height: 1.3;
+    /* 减小行高 */
+    transition: background-color var(--duration-fast) ease;
+}
+
+.history-entry:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.history-entry:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 /* 记录头部 */
@@ -33,10 +38,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: var(--primary-color);
     font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+    /* 减小边距 */
+    padding-bottom: 4px;
+    /* 减小内边距 */
+    border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    font-size: 0.85em;
+    /* 减小字体 */
 }
 
-.history-entry .history-header span {
-    font-size: 0.95em;
+.history-entry div {
+    font-size: 0.85em;
+    /* 减小字体 */
+    color: var(--text-color);
+    padding: 1px 0;
+    /* 减小内边距 */
+}
+
+/* 历史记录数值突出显示 */
+.history-entry div:nth-child(2),
+.history-entry div:nth-child(4),
+.history-entry div:nth-child(6),
+.history-entry div:nth-child(8) {
+    font-weight: bold;
+    color: var(--primary-color);
 }

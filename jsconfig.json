@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@css/*": ["src/css/*"],
+      "/css/*": ["src/css/*"],
+      "@js/*": ["src/js/*"],
+      "/js/*": ["src/js/*"],
+      "@audio/*": ["public/audio/*"]
+    },
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "module": "ESNext"
+  },
+  "include": [
+    "src/**/*",
+    "public/**/*",
+    "index.html"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

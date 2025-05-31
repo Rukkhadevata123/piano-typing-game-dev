@@ -1,28 +1,17 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
-const isElectron = process.env.ELECTRON === 'true';
 const isProd = process.env.NODE_ENV === 'production';
 
 export default defineConfig({
     // 基础配置
-    base: isElectron ? './' : (isProd ? '/piano-typing-game/' : '/'),
-    
-    // 环境变量定义
-    define: {
-        'import.meta.env.BASE_URL': JSON.stringify(
-            isElectron ? './' : (isProd ? '/piano-typing-game/' : '/')
-        ),
-    },
+    base: isProd ? '/piano-typing-game/' : '/',
     
     // 构建配置
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        minify: 'terser',
-        rollupOptions: isElectron ? {
-            output: { format: 'cjs' }
-        } : {}
+        minify: 'terser'
     },
     
     // 路径别名配置

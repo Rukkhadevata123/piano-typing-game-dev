@@ -1,93 +1,135 @@
 /**
- * 等级分系统样式
+ * 等级分系统样式 - 修复tooltip层级和段位动画居中
  */
 
-/* ---------- 等级分基础显示 ---------- */
+/* === 段位变化动画容器 - 完全居中，和游戏结束界面一样 === */
+.level-change-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: calc(var(--z-index-overlay) + 100);
+    /* 超高层级 */
+    opacity: 0;
+    pointer-events: none;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.level-change-animation.show {
+    animation: levelChange 4s ease-in-out forwards;
+}
+
+.level-change-content {
+    background: var(--overlay-background);
+    color: white;
+    padding: var(--spacing-large) calc(var(--spacing-large) * 1.5);
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    border: 3px solid var(--primary-color);
+    backdrop-filter: blur(15px);
+    min-width: 350px;
+    max-width: 500px;
+    position: relative;
+    z-index: 1;
+}
+
+.level-change-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: var(--spacing);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.level-change-from,
+.level-change-to {
+    font-size: 1.6em;
+    font-weight: bold;
+    margin: var(--spacing) 0;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.level-change-arrow {
+    font-size: 2.5em;
+    margin: var(--spacing) 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.level-change-animation.level-down .level-change-content {
+    border-color: var(--error-color);
+}
+
+.level-up-message,
+.level-down-message {
+    font-size: 1.1em;
+    margin-top: var(--spacing);
+    opacity: 0.9;
+    font-style: italic;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* === 添加背景遮罩确保完全覆盖 === */
+.level-change-animation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* === 等级显示 === */
 #player-rating {
     display: flex;
     align-items: center;
-    margin-top: 5px;
+    justify-content: space-between;
     font-weight: bold;
-    transition: all 0.3s ease;
+    background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    transition: all var(--duration-normal) var(--animation-timing);
 }
 
 #rating-level {
     font-size: 1.1em;
     font-weight: bold;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    transition: color 0.5s ease, text-shadow 0.5s ease;
-    padding: 2px 10px;
+    transition: color var(--duration-slow) var(--animation-timing), text-shadow var(--duration-slow) var(--animation-timing);
+    padding: 4px 12px;
     border-radius: 10px;
     display: inline-block;
+    position: relative;
+    cursor: help;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-/* 查看详情按钮样式 */
-#rating-details-button {
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 0.95em;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 0 0 5px;
-    margin-left: 5px;
-    opacity: 0.8;
-    transition: opacity 0.2s, transform 0.2s;
-    line-height: 1;
-    vertical-align: middle;
-}
-
-#rating-details-button:hover {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-#rating-details-button:active {
-    transform: scale(0.95);
-}
-
-/* ---------- 段位特殊效果 ---------- */
-/* 高级段位特效 */
-#rating-level.level-pearl {
-    background: linear-gradient(to right, #f0f8ff, #fdeef4, #f0f8ff);
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-    color: #333 !important;
-}
-
-#rating-level.level-obsidian {
-    background: linear-gradient(to right, #1e1e1e, #413839, #1e1e1e);
-    text-shadow: 0 0 5px rgba(65, 56, 57, 0.8);
-    color: white !important;
-}
-
+/* === 钻石等级特效 === */
 .level-diamond {
-    background: linear-gradient(45deg, #b9f2ff 0%, #e6feff 20%, #b9f2ff 40%, #96f3ff 60%, #b9f2ff 80%, #e6feff 100%);
+    background: linear-gradient(45deg, #b9f2ff 0%, #e6feff 20%, #b9f2ff 40%);
     background-size: 200% 200%;
-    animation: shine 3s linear infinite;
+    animation: diamondShine 3s linear infinite;
     color: #333 !important;
     text-shadow: 0 0 10px rgba(185, 242, 255, 0.8);
     box-shadow: 0 0 15px rgba(185, 242, 255, 0.5);
 }
 
-/* ---------- 等级分详情弹窗 ---------- */
+/* === 模态框 - 超高层级 === */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: calc(var(--z-index-overlay) + 50);
     display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(3px);
     opacity: 0;
-    transform: translateZ(0);
-    /* 强制GPU加速 */
-    will-change: opacity;
-    /* 提示浏览器这个属性会变化 */
-    transition: opacity 0.3s ease;
+    transition: opacity var(--duration-normal) var(--animation-timing);
 }
 
 .modal-overlay.show {
@@ -100,21 +142,18 @@
 
 .rating-details-modal {
     background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     padding: 20px;
     width: 80%;
     max-width: 800px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    color: #333;
+    box-shadow: var(--shadow-medium);
+    color: var(--text-color);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    transform: translateY(20px) translateZ(0);
-    /* 添加translateZ强制GPU加速 */
+    transform: translateY(20px);
     opacity: 0;
-    will-change: transform, opacity;
-    /* 提示浏览器这些属性会变化 */
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform var(--duration-normal) var(--animation-timing), opacity var(--duration-normal) var(--animation-timing);
 }
 
 .modal-overlay.show .rating-details-modal {
@@ -122,24 +161,15 @@
     opacity: 1;
 }
 
-.modal-overlay.closing .rating-details-modal {
-    transform: translateY(20px);
-    opacity: 0;
-}
-
-/* 弹窗内标题 */
-.rating-details-modal h2 {
-    margin-top: 0;
-    color: var(--primary-color);
-    text-align: center;
-    font-weight: bold;
-}
-
-/* 当前等级分显示 */
+/* === 等级分详情页面特定样式 === */
 .current-rating {
     font-size: 1.2em;
-    text-align: center;
-    margin-bottom: 20px;
+    font-weight: bold;
+    margin: var(--spacing) 0;
+    padding: var(--spacing-small);
+    background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
 }
 
 .current-rating span {
@@ -147,242 +177,87 @@
     font-weight: bold;
 }
 
-/* 段位标识公共样式 */
 .level-badge {
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.05);
-    margin-left: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    margin-left: var(--spacing-small);
+    font-size: 0.9em;
+    border: 1px solid currentColor;
 }
 
-/* 等级分详情中的段位标识特殊效果 */
-.current-rating .level-badge.level-pearl {
-    background: linear-gradient(to right, #f0f8ff, #fdeef4, #f0f8ff);
-    color: #333 !important;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-.current-rating .level-badge.level-obsidian {
-    background: linear-gradient(to right, #1e1e1e, #413839, #1e1e1e);
-    color: white !important;
-}
-
-.current-rating .level-badge.level-diamond {
-    background: linear-gradient(45deg, #b9f2ff 0%, #e6feff 20%, #b9f2ff 40%, #96f3ff 60%, #b9f2ff 80%, #e6feff 100%);
-    background-size: 200% 200%;
-    animation: shine 3s linear infinite;
-    color: #333 !important;
-    text-shadow: 0 0 10px rgba(185, 242, 255, 0.5);
-}
-
-/* ---------- 历史记录表格样式 ---------- */
+/* === 表格样式 === */
 .rating-records-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
-    text-align: center;
-    /* 表格内容居中 */
+    margin-top: 15px;
+    font-size: 0.9em;
 }
 
 .rating-records-table th,
 .rating-records-table td {
     padding: 8px 12px;
-    text-align: center;
-    /* 确保所有单元格文本居中 */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .rating-records-table th {
-    background-color: rgba(var(--primary-color-rgb), 0.1);
-    color: #333;
+    background-color: var(--background-color);
+    font-weight: bold;
+    position: sticky;
+    top: 0;
     border-bottom: 2px solid var(--primary-color);
 }
 
-.rating-records-table td {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+.rating-records-table tr:hover {
+    background-color: rgba(52, 152, 219, 0.05);
 }
 
-/* 金银铜前三名样式 */
-.rating-records-table tr:nth-child(1) {
-    background-color: rgba(255, 215, 0, 0.1);
+.rating-records-table tr.focus-mode-record {
+    background-color: rgba(231, 76, 60, 0.1);
 }
 
-.rating-records-table tr:nth-child(1) td:first-child {
-    position: relative;
-}
-
-.rating-records-table tr:nth-child(1) td:first-child::after {
-    content: "🥇";
-    position: absolute;
-    margin-left: 5px;
-    font-size: 1.2em;
-}
-
-.rating-records-table tr:nth-child(2) {
-    background-color: rgba(192, 192, 192, 0.1);
-}
-
-.rating-records-table tr:nth-child(2) td:first-child::after {
-    content: "🥈";
-    position: absolute;
-    margin-left: 5px;
-    font-size: 1.2em;
-}
-
-.rating-records-table tr:nth-child(3) {
-    background-color: rgba(205, 127, 50, 0.1);
-}
-
-.rating-records-table tr:nth-child(3) td:first-child::after {
-    content: "🥉";
-    position: absolute;
-    margin-left: 5px;
-    font-size: 1.2em;
-}
-
-/* ---------- 游戏结束等级分显示 ---------- */
-#final-stats p:last-child span {
-    font-size: 1.3em;
-    animation: pulseGlow 1.5s infinite;
-}
-
-/* 改进等级分在游戏结束界面的显示 */
-.rating-result {
-    margin-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    padding: 15px;
-}
-
-.rating-result p {
-    margin: 8px 0;
-    font-size: 1.15em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.rating-result p span {
+.rating-records-table td:nth-child(2) {
+    font-weight: bold;
     color: var(--primary-color);
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px 8px;
-    border-radius: 4px;
-    min-width: 60px;
-    text-align: center;
-    animation: pulseGlow 1.5s infinite;
 }
 
-.new-best {
-    color: gold !important;
-    font-weight: bold;
-    text-align: center;
-    display: block !important;
-    width: 100%;
-    margin-top: 10px;
-    animation: pulseBest 1.5s infinite !important;
+.focus-mode-tag {
+    background-color: var(--error-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 5px;
+    display: inline-block;
 }
 
-/* ---------- 动画关键帧 ---------- */
-@keyframes shine {
-    0% {
-        background-position: 0 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0 50%;
-    }
-}
-
-@keyframes pulseGlow {
-
-    0%,
-    100% {
-        text-shadow: 0 0 2px currentColor;
-        transform: translateZ(0);
-        /* 强制GPU加速 */
-    }
-
-    50% {
-        text-shadow: 0 0 10px currentColor;
-        transform: translateZ(0);
-        /* 强制GPU加速 */
-    }
-}
-
-@keyframes pulseBest {
-
-    0%,
-    100% {
-        text-shadow: 0 0 3px gold;
-        transform: translateZ(0);
-        /* 强制GPU加速 */
-    }
-
-    50% {
-        text-shadow: 0 0 15px gold;
-        transform: translateZ(0);
-        /* 强制GPU加速 */
-    }
-}
-
-/* ---------- 段位悬浮提示 ---------- */
-#rating-level {
-    position: relative;
-    cursor: help;
-}
-
-/* 悬浮提示框 */
-#rating-level:hover::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 10px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid rgba(0, 0, 0, 0.8);
-    z-index: 1001;
-}
-
-/* 移除旧的伪元素提示 */
-#rating-level:hover::before {
-    display: none;
-}
-
-/* 使用新的自定义悬浮提示 */
-#rating-level {
-    position: relative;
-    cursor: help;
-}
-
-#rating-level .tooltip {
+/* === 提示框 - 超高层级，确保在所有元素之上 === */
+.tooltip {
     visibility: hidden;
     position: absolute;
-    z-index: 1000;
+    z-index: calc(var(--z-index-overlay) + 200);
+    /* 超高层级，确保在游戏方块之上 */
     top: 100%;
     left: 50%;
     margin-top: 10px;
     transform: translateX(-50%);
     width: 280px;
-    background: rgba(0, 0, 0, 0.85);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.95);
+    /* 加深背景，提高可见性 */
+    color: white;
     padding: 12px;
-    border-radius: 5px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    transition: opacity 0.3s;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    /* 加强阴影 */
+    transition: opacity var(--duration-fast) var(--animation-timing), visibility var(--duration-fast) var(--animation-timing);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    /* 添加边框增强可见性 */
     pointer-events: none;
-    text-align: left;
+    /* 防止鼠标交互干扰 */
 }
 
 #rating-level:hover .tooltip {
@@ -390,95 +265,65 @@
     opacity: 1;
 }
 
-/* 提示三角形 */
-#rating-level .tooltip::before {
-    content: "";
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid rgba(0, 0, 0, 0.85);
+.level-tooltip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* 提示内容样式 */
+.level-tooltip-item:last-child {
+    border-bottom: none;
+}
+
 .level-tooltip-title {
     font-weight: bold;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding-bottom: 6px;
-    color: #fff;
+    margin-bottom: var(--spacing-small);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: var(--spacing-small);
+    text-align: center;
+    color: #ffd700;
+    /* 金色标题 */
 }
 
-.level-tooltip-item {
-    margin: 6px 0;
-    line-height: 1.4;
+/* === 按钮容器样式 === */
+.rating-button-container {
+    display: flex;
+    gap: var(--spacing);
+    justify-content: center;
+    margin-top: var(--spacing-large);
+}
+
+.modal-button {
     display: flex;
     align-items: center;
-    /* 确保垂直居中对齐 */
-}
-
-.level-tooltip-item span:first-child {
-    display: inline-flex;
-    /* 改为inline-flex */
-    align-items: center;
-    /* 垂直居中 */
-    justify-content: center;
-    /* 水平居中 */
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    margin-right: 8px;
-    flex-shrink: 0;
-    /* 防止圆点被压缩 */
-    line-height: 1;
-    /* 设置行高为1确保内容垂直居中 */
-}
-
-.level-tooltip-item span:nth-child(2) {
+    gap: var(--spacing-small);
+    padding: var(--spacing-small) var(--spacing);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
     font-weight: bold;
-    margin-right: 6px;
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-    display: inline-flex;
-    /* 改为inline-flex */
-    align-items: center;
-    /* 垂直居中 */
-    min-width: 90px;
-    /* 稍微增加宽度，确保所有段位名称不会换行 */
-    height: 20px;
-    /* 固定高度以确保对齐 */
+    cursor: pointer;
+    transition: all var(--duration-fast) ease;
 }
 
-.level-tooltip-item span:nth-child(3) {
-    display: inline-flex;
-    align-items: center;
-    height: 20px;
-    margin-left: auto;
-    /* Push to right */
-    text-align: right;
-    min-width: 90px;
-    /* Fixed width for better alignment */
+.export-button {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
 }
 
-.tooltip {
-    background-color: rgba(0, 0, 0, 0.85);
-    border-radius: 5px;
-    padding: 12px 15px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-    width: 300px;
-    /* 稍微加宽一点，确保文本不会换行 */
+.export-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
-/* 视口适配处理 */
-@media (max-width: 768px) {
-    #rating-level .tooltip {
-        left: 0;
-        transform: none;
-        width: 250px;
-    }
+.close-button {
+    background: var(--border-color);
+    color: var(--text-color);
+}
 
-    #rating-level .tooltip::before {
-        left: 20px;
-    }
+.close-button:hover {
+    background: var(--error-color);
+    color: white;
 }

@@ -1,6 +1,5 @@
 /**
- * 游戏棋盘组件样式
- * 包含：棋盘布局、单元格样式、动画效果
+ * 游戏棋盘组件样式 - 居中无空白版本
  */
 
 /* 游戏棋盘容器 */
@@ -8,10 +7,16 @@
     display: grid;
     grid-template-columns: repeat(6, var(--cell-size));
     gap: var(--grid-gap);
-    margin: 0;
-    padding: var(--spacing-small);
+    margin: 0 auto;
+    /* 居中显示 */
+    padding: var(--spacing);
     background: var(--board-background);
     border-radius: var(--border-radius);
+    width: fit-content;
+    /* 宽度适应内容 */
+    box-shadow: var(--shadow-light);
+    justify-self: center;
+    /* 在网格中居中 */
 }
 
 /* 行容器 - 使用 contents 以保持网格结构 */
@@ -40,34 +45,49 @@
     will-change: transform;
 }
 
-/* 填充状态 */
-.cell.filled {
-    background-color: var(--cell-color, var(--primary-color));
-    box-shadow: var(--shadow-light);
-    transform: translateY(-2px);
-}
-
-/* 下落动画 */
+/* 下落动画 - 优化性能 */
 .cell.dropping {
-    animation: dropAnimation var(--animation-speed) var(--animation-timing);
+    animation: dropAnimation 0.3s ease-out;
     animation-fill-mode: both;
-    /* 保持最终状态 */
+    /* 启用GPU加速 */
+    transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
-/* 点击反馈 */
-.cell:active {
-    opacity: 0.7;
-}
-
-/* 下落动画关键帧 */
+/* 优化的下落动画关键帧 */
 @keyframes dropAnimation {
     0% {
-        transform: translateY(-100%);
+        transform: translate3d(0, -100%, 0);
         opacity: 0.5;
     }
 
+    50% {
+        transform: translate3d(0, -10%, 0);
+        opacity: 0.8;
+    }
+
     100% {
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0);
         opacity: 1;
     }
+}
+
+/* 填充状态优化 */
+.cell.filled {
+    background-color: var(--cell-color, var(--primary-color));
+    box-shadow: var(--shadow-light);
+    /* 使用transform而不是改变位置 */
+    transform: translate3d(0, -2px, 0);
+    /* 提升到合成层 */
+    will-change: transform;
+}
+
+/* 减少重排的hover效果 */
+.cell:hover {
+    transform: translate3d(0, -1px, 0) scale(1.02);
+}
+
+.cell:active {
+    opacity: 0.7;
+    transform: translate3d(0, 1px, 0) scale(0.98);
 }

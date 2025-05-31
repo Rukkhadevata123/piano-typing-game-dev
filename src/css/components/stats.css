@@ -1,50 +1,131 @@
 /**
- * 游戏统计信息样式
- * 包含：计分板、连击显示
+ * 游戏统计信息样式 - 修复历史记录尺寸
  */
 
-/* 统计信息容器 */
+/* === 统计信息容器 === */
 #stats-container {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-small);
     margin-bottom: var(--spacing);
     padding: var(--spacing);
-
-    /* 视觉样式 */
     background: rgba(255, 255, 255, 0.9);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    width: 100%;
 }
 
-/* 统计项目 */
+/* === 统计项目 === */
 #stats-container>div {
     text-align: left;
     padding: var(--spacing-small);
     font-size: var(--font-size-base);
     color: var(--text-color);
-    min-width: 150px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--border-radius);
+    transition: all var(--animation-speed) ease;
+    line-height: 1.4;
 }
 
-/* 连击显示 */
+#stats-container>div:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateX(2px);
+}
+
+/* === 特殊统计项样式 === */
+#score {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: var(--font-size-large);
+}
+
+#timer {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
 #combo {
     font-weight: bold;
     color: var(--error-color);
 }
 
-/* 专注模式记录样式 */
+#accuracy {
+    color: var(--success);
+}
+
+#cps {
+    color: var(--secondary-color);
+}
+
+/* === 等级分显示 === */
+#player-rating {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+    background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(155, 89, 182, 0.1));
+    font-size: var(--font-size-base);
+}
+
+#rating-level {
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    transition: color var(--duration-slow) ease, text-shadow var(--duration-slow) ease;
+    padding: var(--spacing-small);
+    border-radius: var(--border-radius);
+    display: inline-block;
+    position: relative;
+    cursor: help;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* === 历史记录 - 固定合理尺寸 === */
+#history-container {
+    padding: var(--spacing);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    width: 100%;
+    /* 移除 flex: 1，使用固定的合理尺寸 */
+    max-height: 200px;
+    /* 设置最大高度限制 */
+    min-height: auto;
+    /* 移除最小高度限制 */
+    display: flex;
+    flex-direction: column;
+}
+
+#history-container h3 {
+    margin: 0 0 var(--spacing-small) 0;
+    /* 减小标题下边距 */
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    /* 减小标题字体 */
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: var(--spacing-small);
+    flex-shrink: 0;
+}
+
+#history-stats {
+    flex: 1;
+    overflow-y: auto;
+    /* 如果内容过多允许滚动，但容器本身不会无限扩展 */
+}
+
+/* === 专注模式记录样式 === */
 .rating-records-table tr.focus-mode-record {
     background-color: rgba(231, 76, 60, 0.1);
 }
 
 .focus-mode-tag {
-    display: inline-block;
-    margin-left: 5px;
-    padding: 1px 4px;
-    font-size: 0.8em;
-    background-color: #e74c3c;
+    background-color: var(--error-color);
     color: white;
+    padding: 2px 6px;
     border-radius: 3px;
-    font-weight: normal;
-    vertical-align: middle;
+    font-size: 0.8em;
+    margin-left: 5px;
 }

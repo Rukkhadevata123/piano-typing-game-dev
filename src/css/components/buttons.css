@@ -1,16 +1,15 @@
 /**
  * 按钮组件样式
- * 包含：按键指南、重启按钮
+ * 包含：按键指南、重启按钮、模态框按钮
  */
 
-/* 按键指南 */
+/* === 按键指南保持不变 === */
 .key-guide {
     margin: var(--spacing) 0;
     font-size: var(--font-size-large);
     color: var(--text-color);
 }
 
-/* 主题提示 */
 .theme-hint {
     display: block;
     margin-top: var(--spacing-small);
@@ -19,7 +18,6 @@
     opacity: 0.8;
 }
 
-/* 按键样式 */
 .key {
     display: inline-block;
     padding: 4px 8px;
@@ -32,57 +30,54 @@
     box-shadow: var(--shadow-light);
 }
 
-/* 重启按钮 */
-#restart-button {
-    margin-top: var(--spacing);
-    width: 100%;
-    padding: var(--spacing) var(--spacing-large);
-    font-size: var(--font-size-base);
-    background: var(--primary-color);
-    color: white;
+/* === 基础按钮样式 === */
+.btn-base {
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) ease;
+    font-family: var(--font-family);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* === 重启按钮 === */
+#restart-button {
+    /* 继承基础样式 */
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--duration-fast) ease;
+    font-family: var(--font-family);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    /* 特定样式 */
+    margin-top: var(--spacing);
+    width: 100%;
+    padding: var(--spacing) var(--spacing-large);
+    font-size: var(--font-size-large);
+    background: var(--primary-color);
+    color: white;
+    box-shadow: var(--shadow-medium);
     z-index: calc(var(--z-index-overlay) + 1);
-    position: relative;
-}
-
-/* 按键提示样式 - 更协调的设计 */
-.key-hint {
-    /* 降低对比度，使用更柔和的外观 */
-    opacity: 0.9;
-    /* 与按钮字体保持一致，删除 monospace */
-    font-size: 0.9em;
-    font-weight: normal;
-    /* 调整间距 */
-    margin-left: 6px;
-    /* 更细微的背景，降低透明度 */
-    background-color: rgba(255, 255, 255, 0.08);
-    /* 调整内边距使其更紧凑 */
-    padding: 1px 4px;
-    /* 更小的圆角与按钮更协调 */
-    border-radius: 2px;
-    /* 添加微妙的边框增强可读性 */
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    /* 添加过渡效果，按钮悬停时更平滑 */
-    transition: all 0.2s ease;
-}
-
-/* 按钮悬停时按键提示也跟随变化 */
-#restart-button:hover .key-hint {
-    /* 悬停时轻微增加对比度 */
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
 }
 
 #restart-button:hover:not(:disabled) {
     background: var(--secondary-color);
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 #restart-button:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: var(--shadow-light);
 }
 
 #restart-button:disabled {
@@ -90,8 +85,24 @@
     cursor: not-allowed;
 }
 
-/* ---------- 等级分详情弹窗按钮 ---------- */
-/* 按钮容器 - 用于排列导出和关闭按钮 */
+.key-hint {
+    opacity: 0.9;
+    font-size: 0.9em;
+    font-weight: normal;
+    margin-left: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 1px 4px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all var(--duration-fast) ease;
+}
+
+#restart-button:hover .key-hint {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* === 等级分详情弹窗按钮 === */
 .rating-button-container {
     display: flex;
     justify-content: space-between;
@@ -99,75 +110,68 @@
     gap: 15px;
 }
 
-/* 模态框按钮共享基础样式 */
 .modal-button {
-    flex: 1;
-    height: 42px;
-    padding: 0 20px;
+    /* 继承基础样式 */
     border: none;
-    border-radius: 6px;
-    font-size: 15px;
-    font-weight: 500;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
+    transition: all var(--duration-fast) ease;
+    font-family: var(--font-family);
+    font-weight: 500;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    /* 特定样式 */
+    flex: 1;
+    height: 42px;
+    padding: 0 20px;
+    font-size: 15px;
 }
 
-.modal-button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.modal-button:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.modal-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* 导出按钮特定样式 */
 .export-button {
-    background-color: var(--primary-color);
+    background: var(--primary-color);
     color: white;
 }
 
-.export-button:hover:not(:disabled) {
-    background-color: var(--secondary-color);
+.export-button:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
 }
 
-/* 关闭按钮特定样式 */
 .close-button {
-    background-color: #f0f0f0;
-    color: #555;
+    background: #f0f0f0;
+    color: var(--text-color);
 }
 
-.close-button:hover:not(:disabled) {
-    background-color: #e0e0e0;
-    color: #333;
+.close-button:hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
 }
 
-/* 按钮内部图标样式 */
-.button-icon {
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* === 等级分详情按钮 === */
+#rating-details-button {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 0.95em;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 0 0 5px;
+    margin-left: 5px;
+    opacity: 0.8;
+    transition: opacity var(--duration-fast), transform var(--duration-fast);
+    line-height: 1;
+    vertical-align: middle;
 }
 
-/* 按钮文本样式 */
-.button-text {
-    font-size: 15px;
-    white-space: nowrap;
+#rating-details-button:hover {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
-/* 响应式调整 */
+/* === 响应式适配 === */
 @media (max-width: 480px) {
     .rating-button-container {
         flex-direction: column;

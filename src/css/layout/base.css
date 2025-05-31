@@ -1,43 +1,121 @@
 /**
- * 基础布局样式
- * 包含：重置样式、基础布局、公共样式
+ * 基础布局样式 - 优化左侧区域
  */
 
-/* 重置样式 */
+/* === 重置样式 === */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* 基础布局 */
+/* === 基础布局 === */
 body {
     background-color: var(--background-color);
     font-family: var(--font-family), sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--text-color);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: var(--spacing-small);
 }
 
-/* 游戏容器 */
+/* === 游戏容器 - 精确尺寸，无多余空白 === */
 #game-container {
     text-align: center;
     padding: var(--spacing);
     background: var(--container-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-medium);
+    width: fit-content;
+    max-width: 750px;
+    /* 稍微增大以容纳更好的布局 */
+    min-width: 650px;
+    /* 稍微增大最小宽度 */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all var(--animation-speed) ease;
 }
 
-/* 游戏区域布局 */
+#game-container.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* === 标题样式 === */
+h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing);
+    font-size: 2.5em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* === 按键说明 === */
+.key-guide {
+    margin: var(--spacing) 0;
+    font-size: var(--font-size-large);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.key {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 0 2px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+    box-shadow: var(--shadow-light);
+    font-size: 0.9em;
+}
+
+.theme-hint {
+    font-size: var(--font-size-small);
+    opacity: 0.8;
+    margin-top: var(--spacing-small);
+    display: block;
+}
+
+/* === 游戏区域布局 - 优化高度 === */
 .game-area {
     display: grid;
     grid-template-columns: 200px 1fr;
-    gap: var(--grid-gap);
+    gap: var(--spacing);
     margin: var(--spacing) 0;
+    align-items: start;
+    justify-items: center;
+    width: 100%;
+    min-height: 400px;
+    /* 减小最小高度 */
 }
 
-/* 游戏数据区域 */
+/* === 游戏统计区域 === */
 .game-stats {
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-small);
+    width: 100%;
+    height: fit-content;
+    /* 改为内容适应高度 */
+}
+
+.key-hint {
+    opacity: 0.9;
+    font-size: 0.9em;
+    font-weight: normal;
+    margin-left: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 1px 4px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all var(--duration-fast) ease;
 }

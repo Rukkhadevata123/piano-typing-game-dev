@@ -1,99 +1,64 @@
 /**
- * 全局 CSS 变量定义
- * 按照以下类别组织：
- * 1. 布局尺寸
- * 2. 颜色系统
- * 3. 边框和圆角
- * 4. 阴影效果
- * 5. 动画配置
+ * 全局CSS变量定义 - 紧凑尺寸版本
  */
 
 :root {
-    /* 布局尺寸 
-     * --------------------------------- */
+    /* === 核心尺寸系统 === */
     --cell-size: 60px;
-    /* 游戏方块大小 */
+    /* 保持合适的点击尺寸 */
     --grid-gap: 5px;
-    /* 网格间距 */
-
-    /* 颜色系统
-     * --------------------------------- */
-    /* 主要颜色 */
-    --primary-color: #3498db;
-    /* 主色调 - 蓝色 */
-    --primary-color-rgb: 52, 152, 219;
-    /* 主色调RGB值 - 用于rgba函数 */
-    --secondary-color: #2980b9;
-    /* 次要色调 - 深蓝 */
-    --cell-color: #f39c12;
-    /* 方格色 - 橙色 */
-
-    /* 功能颜色 */
-    --background-color: #f0f0f0;
-    /* 背景色 - 浅灰 */
-    --text-color: #333;
-    /* 文本色 - 深灰 */
-    --error-color: #e74c3c;
-    /* 错误色 - 红色 */
-    --border-color: #ddd;
-    /* 边框色 - 浅灰 */
-
-    /* 边框和圆角
-     * --------------------------------- */
     --border-radius: 8px;
-    /* 通用圆角大小 */
+    --max-width: 700px;
+    /* 大幅减小最大宽度 */
 
-    /* 阴影效果
-     * --------------------------------- */
+    /* === 间距系统 === */
+    --spacing-small: 8px;
+    /* 减小 */
+    --spacing: 16px;
+    /* 减小 */
+    --spacing-large: 24px;
+    /* 减小 */
+
+    /* === 主色彩系统 === */
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --error-color: #e74c3c;
+    --success: #27ae60;
+    --accent: #f39c12;
+
+    /* === 背景色系统 === */
+    --background-color: #f0f0f0;
+    --container-background: rgba(255, 255, 255, 0.95);
+    --board-background: rgba(238, 238, 238, 0.9);
+    --overlay-background: rgba(0, 0, 0, 0.8);
+
+    /* === 文字和边框 === */
+    --text-color: #333;
+    --text-light: #666;
+    --border-color: #ddd;
+
+    /* === 阴影系统 === */
     --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* 轻微阴影 */
-    --shadow-medium: 0 0 20px rgba(0, 0, 0, 0.1);
-    /* 中等阴影 */
+    --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
 
-    /* 动画配置
-     * --------------------------------- */
-    --animation-speed: 0.3s;
-    /* 动画持续时间 */
-    --animation-timing: ease-in-out;
-    /* 动画缓动函数 */
-
-    /* 响应式断点（可选）
-     * --------------------------------- */
-    --breakpoint-mobile: 768px;
-    --breakpoint-tablet: 1024px;
-
-    /* 间距系统 */
-    --spacing: 20px;
-    --spacing-small: 10px;
-    --spacing-large: 30px;
-
-    /* 字体系统 */
+    /* === 字体系统 === */
     --font-family: "Arial", sans-serif;
     --font-size-small: 0.9em;
     --font-size-base: 1em;
-    --font-size-large: 1.5em;
+    --font-size-large: 1.2em;
 
-    /* 背景色系统 */
-    --container-background: white;
-    --board-background: rgba(238, 238, 238, 0.9);
-    --overlay-background: rgba(0, 0, 0, 0.9);
+    /* === 动画系统 === */
+    --animation-speed: 0.3s;
+    --animation-timing: ease-in-out;
+    --duration-fast: 0.2s;
+    --duration-normal: 0.3s;
+    --duration-slow: 0.5s;
 
-    /* z-index 层级 */
+    /* === 层级系统 === */
     --z-index-base: 1;
     --z-index-overlay: 9999;
 
-    /* 最大宽度限制 */
-    --max-width: 1200px;
+    /* === 响应式断点 === */
+    --bp-mobile: 768px;
+    --bp-tablet: 1024px;
 }
-
-/* 深色主题变量（可选）
- * --------------------------------- */
-/* @media (prefers-color-scheme: dark) {
-    :root {
-        --background-color: #222;
-        --text-color: #fff;
-        --border-color: #444;
-        --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.3);
-        --shadow-medium: 0 0 20px rgba(0, 0, 0, 0.3);
-    }
-} */

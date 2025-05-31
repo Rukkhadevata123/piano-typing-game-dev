@@ -2,233 +2,151 @@ import { gameConfig } from '@js/config/gameConfig.js';
 
 export class ScoreCalculator {
   constructor() {
-    // 基础得分配置
-    this.HIT_POINTS = gameConfig.points.hit;
-    this.MISS_POINTS = gameConfig.points.miss;
+    // === 基础配置 ===
+    this.BASE_POINTS = {
+      hit: gameConfig.points.hit,
+      miss: gameConfig.points.miss,
+    };
 
-    // 里程碑连击点位
     this.COMBO_MILESTONES = [
       25, 42, 50, 69, 75, 100, 150, 200, 250, 300, 350, 400, 404, 450, 500, 550,
       600, 650, 700, 750, 777, 800, 850, 900, 950, 1000,
     ];
 
-    // 计算参数
-    this.params = {
-      // 连击乘数参数 - 增加到0.35让增长更明显
-      comboLogBase: 0.35,
+    // === 计算参数 ===
+    this.COMBO_PARAMS = {
+      logBase: 0.35,
+      penalty: {
+        low: 0.35, // ≤10连击
+        mid: 0.6, // 11-50连击
+        high: 3, // >50连击
+      },
+    };
 
-      // 连击惩罚参数 - 调整为更严厉的惩罚
-      penaltyFactorLow: 0.35, // ≤10连击
-      penaltyFactorMid: 0.6, // 11-50连击
-      penaltyFactorHigh: 3, // >50连击
+    this.MILESTONE_PARAMS = {
+      baseBonus: 8,
+      growthBase: 1.6,
+      scaleCap: 4,
+    };
 
-      // 里程碑奖励参数
-      milestoneBaseBonus: 8,
-      milestoneGrowthBase: 1.6, // 使用1.6作为底数而非2
-      milestoneScaleCap: 4, // 最大比例因子
+    this.SCORE_LIMITS = {
+      min: -80,
+      max: 250,
     };
   }
 
-  /**
-   * 计算最终得分
-   * @param {boolean} isHit - 是否命中
-   * @param {Object} stats - 游戏统计信息
-   * @param {number} timeLeft - 剩余时间
-   * @param {number} totalTime - 总时间
-   * @returns {Object} 得分详情
-   */
+  // === 主要计算接口 ===
   calculate(isHit, stats, timeLeft, totalTime) {
-    // 获取各项指标
-    const { accuracy, cps, currentCombo } = stats;
-
-    // 1. 计算基础分数
-    const basePoints = this.calculateBasePoints(isHit);
-
-    // 2. 计算最终乘数
-    const multipliers = this.calculateMultipliers(stats, timeLeft, totalTime);
-
-    // 3. 应用乘数计算得分
+    const basePoints = this._getBasePoints(isHit);
+    const multipliers = this._calculateMultipliers(stats, timeLeft, totalTime);
     let finalPoints = Math.round(basePoints * multipliers.total);
 
-    // 4. 处理特殊得分调整
-    const details = this.calculateSpecialPoints(
+    const specials = this._calculateSpecialAdjustments(
       isHit,
-      currentCombo,
+      stats.currentCombo,
       finalPoints
     );
-    finalPoints = details.adjustedPoints;
+    finalPoints = this._clampPoints(specials.adjustedPoints);
 
-    // 5. 限制最终得分范围
-    finalPoints = this.clampPoints(finalPoints);
-
-    // 6. 返回完整得分信息
     return {
       points: finalPoints,
-      basePoints: basePoints,
-      multipliers: {
-        combo: multipliers.combo.toFixed(2),
-        accuracy: multipliers.accuracy.toFixed(2),
-        cps: multipliers.cps.toFixed(2),
-        timeLeft: multipliers.timeLeft.toFixed(2),
-        total: multipliers.total.toFixed(2),
-      },
+      basePoints,
+      multipliers: this._formatMultipliers(multipliers),
       details: {
-        comboPenalty: details.comboPenalty,
-        milestoneBonus: details.milestoneBonus,
+        comboPenalty: specials.comboPenalty,
+        milestoneBonus: specials.milestoneBonus,
       },
     };
   }
 
-  /**
-   * 计算基础分数
-   */
-  calculateBasePoints(isHit) {
-    return isHit ? this.HIT_POINTS : this.MISS_POINTS;
+  // === 内部计算方法 ===
+  _getBasePoints(isHit) {
+    return isHit ? this.BASE_POINTS.hit : this.BASE_POINTS.miss;
   }
 
-  /**
-   * 计算所有乘数
-   */
-  calculateMultipliers(stats, timeLeft, totalTime) {
+  _calculateMultipliers(stats, timeLeft, totalTime) {
     const { accuracy, cps, currentCombo } = stats;
 
-    // 各项乘数计算
-    const comboMultiplier = this.getComboMultiplier(currentCombo);
-    const accuracyMultiplier = 0.5 + accuracy / 100;
+    const combo = this._getComboMultiplier(currentCombo);
+    const accuracyMult = 0.5 + accuracy / 100;
     const cpsBonus = Math.min(0.5, cps * 0.1);
     const timeLeftFactor = 1 + (1 - timeLeft / totalTime) * 0.5;
 
-    // 综合计算
-    const baseMultiplier = comboMultiplier;
-    const bonusFactor =
-      accuracyMultiplier - 1 + cpsBonus + (timeLeftFactor - 1);
-
-    // 混合乘加模式
-    const totalMultiplier = baseMultiplier * (1 + bonusFactor * 0.5);
-
-    // 应用上下限
-    const finalMultiplier = Math.max(0.5, Math.min(4.5, totalMultiplier));
+    const baseMultiplier = combo;
+    const bonusFactor = accuracyMult - 1 + cpsBonus + (timeLeftFactor - 1);
+    const total = Math.max(
+      0.5,
+      Math.min(4.5, baseMultiplier * (1 + bonusFactor * 0.5))
+    );
 
     return {
-      combo: comboMultiplier,
-      accuracy: accuracyMultiplier,
+      combo,
+      accuracy: accuracyMult,
       cps: 1 + cpsBonus,
       timeLeft: timeLeftFactor,
-      total: finalMultiplier,
+      total,
     };
   }
 
-  /**
-   * 计算特殊得分调整（连击惩罚和里程碑奖励）
-   */
-  calculateSpecialPoints(isHit, currentCombo, currentPoints) {
+  _calculateSpecialAdjustments(isHit, currentCombo, currentPoints) {
     let adjustedPoints = currentPoints;
     let comboPenalty = 0;
     let milestoneBonus = 0;
 
-    // 连击中断惩罚
     if (!isHit && currentCombo > 5) {
-      comboPenalty = this.getComboPenalty(currentCombo);
+      comboPenalty = this._getComboPenalty(currentCombo);
       adjustedPoints -= comboPenalty;
     }
 
-    // 里程碑奖励
     if (isHit) {
-      milestoneBonus = this.getMilestoneBonus(currentCombo);
+      milestoneBonus = this._getMilestoneBonus(currentCombo);
       adjustedPoints += milestoneBonus;
     }
 
-    return {
-      adjustedPoints,
-      comboPenalty,
-      milestoneBonus,
-    };
+    return { adjustedPoints, comboPenalty, milestoneBonus };
   }
 
-  /**
-   * 限制分数范围
-   */
-  clampPoints(points) {
-    return Math.min(250, Math.max(-80, points));
+  // === 乘数计算 ===
+  _getComboMultiplier(combo) {
+    return 1 + Math.log(combo + 1) * this.COMBO_PARAMS.logBase;
   }
 
-  /**
-   * 计算连击乘数
-   */
-  getComboMultiplier(currentCombo) {
-    // 使用对数函数，前期增长快，后期放缓但不停止
-    // 增加系数到0.35，让连击增长更明显
-    // 100连击约为2.6倍，1000连击约为3.4倍
-    return 1 + Math.log(currentCombo + 1) * this.params.comboLogBase;
-  }
+  _getComboPenalty(combo) {
+    const basePenalty = Math.min(70, combo);
+    const { low, mid, high } = this.COMBO_PARAMS.penalty;
 
-  /**
-   * 计算连击中断惩罚
-   */
-  getComboPenalty(currentCombo) {
-    // 基础惩罚，但不超过70
-    let basePenalty = Math.min(70, currentCombo);
-
-    if (currentCombo <= 10) {
-      // 连击≤10，轻微惩罚
-      return Math.round(basePenalty * this.params.penaltyFactorLow);
-    } else if (currentCombo <= 50) {
-      // 连击10-50，中等惩罚
-      return Math.round(
-        10 * this.params.penaltyFactorLow +
-          (basePenalty - 10) * this.params.penaltyFactorMid
-      );
+    if (combo <= 10) {
+      return Math.round(basePenalty * low);
+    } else if (combo <= 50) {
+      return Math.round(10 * low + (basePenalty - 10) * mid);
     } else {
-      // 连击>50，高惩罚但增长速度放缓
-      return Math.round(
-        10 * this.params.penaltyFactorLow +
-          40 * this.params.penaltyFactorMid +
-          Math.sqrt(currentCombo - 50) * this.params.penaltyFactorHigh
-      );
+      return Math.round(10 * low + 40 * mid + Math.sqrt(combo - 50) * high);
     }
   }
 
-  /**
-   * 计算里程碑奖励
-   */
-  getMilestoneBonus(currentCombo) {
-    const milestoneIndex = this.COMBO_MILESTONES.indexOf(currentCombo);
+  _getMilestoneBonus(combo) {
+    const milestoneIndex = this.COMBO_MILESTONES.indexOf(combo);
     if (milestoneIndex < 0) return 0;
 
-    // 基础奖励
-    const baseBonus = this.params.milestoneBaseBonus;
+    const { baseBonus, growthBase, scaleCap } = this.MILESTONE_PARAMS;
+    const scaleFactor = Math.min(scaleCap, 1 + milestoneIndex * 0.25);
+    const bonus =
+      Math.pow(growthBase, milestoneIndex) * baseBonus * scaleFactor;
 
-    // 指数增长但使用较小底数1.6
-    const scaleFactor = Math.min(
-      this.params.milestoneScaleCap,
-      1 + milestoneIndex * 0.25
-    );
-
-    // 使用1.6作为底数，增长会更平缓
-    const exponentialBonus =
-      Math.pow(this.params.milestoneGrowthBase, milestoneIndex) *
-      baseBonus *
-      scaleFactor;
-
-    // 确保奖励适度
-    return Math.min(800, Math.round(exponentialBonus));
+    return Math.min(800, Math.round(bonus));
   }
 
-  /**
-   * 帮助测试和调试的方法
-   */
-  testCalculation(combo, isHit = true) {
-    // 模拟标准状态
-    const stats = {
-      accuracy: 95,
-      cps: 3,
-      currentCombo: combo,
-    };
+  // === 工具方法 ===
+  _clampPoints(points) {
+    return Math.min(
+      this.SCORE_LIMITS.max,
+      Math.max(this.SCORE_LIMITS.min, points)
+    );
+  }
 
-    // 模拟游戏时间
-    const timeLeft = 30;
-    const totalTime = 60;
-
-    return this.calculate(isHit, stats, timeLeft, totalTime);
+  _formatMultipliers(multipliers) {
+    return Object.fromEntries(
+      Object.entries(multipliers).map(([key, value]) => [key, value.toFixed(2)])
+    );
   }
 }

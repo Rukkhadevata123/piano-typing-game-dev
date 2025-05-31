@@ -1,9 +1,8 @@
 /**
- * 游戏结束界面样式
- * 包含：弹窗、遮罩、统计信息
+ * 游戏结束界面样式 - 修复层级冲突
  */
 
-/* 游戏结束容器 */
+/* 游戏结束容器 - 降低层级以避免与段位动画冲突 */
 #game-over {
     position: fixed;
     top: 50%;
@@ -17,9 +16,11 @@
     border-radius: var(--border-radius);
     text-align: center;
     box-shadow: var(--shadow-medium);
-    z-index: var(--z-index-overlay);
+    z-index: calc(var(--z-index-overlay) + 10);
+    /* 降低层级，让段位动画在上层 */
     transition: all 0.3s ease;
     pointer-events: none;
+    backdrop-filter: blur(10px);
 
     /* 防止闪烁 */
     visibility: hidden;
@@ -32,14 +33,15 @@
     visibility: visible;
 }
 
-/* 背景遮罩 */
+/* 背景遮罩 - 降低层级 */
 .overlay-backdrop {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: calc(var(--z-index-overlay) - 1);
+    z-index: calc(var(--z-index-overlay) + 5);
+    /* 降低层级 */
     pointer-events: none;
 }
 
@@ -67,4 +69,23 @@
     color: var(--primary-color);
     font-weight: bold;
     font-size: 1.2em;
+}
+
+/* === 等级分容器样式 === */
+#rating-container {
+    margin: var(--spacing) 0;
+    padding: var(--spacing);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#new-best-container {
+    margin-top: var(--spacing-small);
+    padding: var(--spacing-small);
+    background: linear-gradient(45deg, var(--success), #27ae60);
+    border-radius: var(--border-radius);
+    color: white;
+    font-weight: bold;
+    text-align: center;
 }
