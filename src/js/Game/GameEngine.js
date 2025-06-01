@@ -40,22 +40,45 @@ export class GameEngine {
   }
 
   setupCallbacks() {
+    // 统计更新事件 - 统一处理所有统计相关的UI更新
+    this.statsManager.on('statsUpdated', (data) => {
+      this.renderer?.uiManager.updateStats(data.currentStats);
+
+      // 处理连击中断
+      if (data.comboChange?.comboBreak) {
+        // 这里可以触发连击中断的特殊效果
+        console.log(
+          `[GameEngine] 连击中断: ${data.comboChange.comboBreak.combo}`
+        );
+      }
+    });
+
     // 专注模式游戏结束
-    this.statsManager.onFocusModeGameEnd = (reason) => {
+    this.statsManager.on('focusGameEnd', (data) => {
       console.log(
-        `[GameEngine] 专注模式${reason === 'timeout' ? '超时' : '连续失误'}结束游戏`
+        `[GameEngine] 专注模式${data.reason === 'timeout' ? '超时' : '连续失误'}结束游戏`
       );
       this.endGame();
-    };
+    });
 
-    // 分数变化
+    // 专注模式状态变化
+    this.statsManager.on('focusModeChanged', (data) => {
+      this.renderer?.updateFocusMode(data.focusMode);
+    });
+
+    // 游戏状态变化
+    this.statsManager.on('gameStateChanged', (data) => {
+      console.log(`[GameEngine] 游戏状态变化: isPlaying=${data.isPlaying}`);
+    });
+
+    // 统计重置
+    this.statsManager.on('statsReset', (data) => {
+      this.renderer?.uiManager.updateStats(data.newStats);
+    });
+
+    // 分数变化 - 保持原有逻辑
     this.scoreManager.onScoreChange = (score, details) => {
       this.renderer?.uiManager.updateScore(score, details);
-    };
-
-    // 统计变化
-    this.statsManager.onStatsChange = () => {
-      this.renderer?.uiManager.updateStats(this.statsManager.getStats());
     };
   }
 

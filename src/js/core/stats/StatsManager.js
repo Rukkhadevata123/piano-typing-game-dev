@@ -30,23 +30,57 @@ export class StatsManager {
       isPlaying: false,
     };
 
-    // === 事件回调 ===
-    this.callbacks = {
-      onStatsChange: null,
-      onComboBreak: null,
-      onFocusModeGameEnd: null,
-    };
+    // === 事件系统 - 简化为单一事件发射器 ===
+    this.eventListeners = new Map();
+  }
+
+  // === 事件系统 ===
+  on(eventType, callback) {
+    if (!this.eventListeners.has(eventType)) {
+      this.eventListeners.set(eventType, new Set());
+    }
+    this.eventListeners.get(eventType).add(callback);
+  }
+
+  off(eventType, callback) {
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      listeners.delete(callback);
+    }
+  }
+
+  emit(eventType, data = null) {
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      listeners.forEach((callback) => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`[StatsManager] 事件回调错误 (${eventType}):`, error);
+        }
+      });
+    }
   }
 
   // === 主要统计更新 ===
   update(isHit) {
     console.log(`[StatsManager] 更新统计: isHit=${isHit}`);
 
+    const previousStats = this.getStats();
+
     this._updateTimeTracking();
     this._updateHitMissStats(isHit);
-    this._updateComboStats(isHit);
+    const comboChange = this._updateComboStats(isHit);
 
-    this.callbacks.onStatsChange?.();
+    const currentStats = this.getStats();
+
+    // 发射统一的更新事件，包含所有必要信息
+    this.emit('statsUpdated', {
+      isHit,
+      previousStats,
+      currentStats,
+      comboChange,
+    });
   }
 
   // === 专注模式管理 ===
@@ -56,6 +90,10 @@ export class StatsManager {
     this._manageFocusChecking();
 
     console.log(`[StatsManager] 专注模式: ${this.focusMode ? '开启' : '关闭'}`);
+
+    // 发射专注模式变化事件
+    this.emit('focusModeChanged', { focusMode: this.focusMode });
+
     return this.focusMode;
   }
 
@@ -69,7 +107,7 @@ export class StatsManager {
     this.focusData.consecutiveMisses++;
     if (this.focusData.consecutiveMisses >= 2) {
       console.log('[StatsManager] 专注模式: 连续失误两次，游戏结束');
-      this.callbacks.onFocusModeGameEnd?.('consecutive_misses');
+      this.emit('focusGameEnd', { reason: 'consecutive_misses' });
       return true;
     }
     return false;
@@ -86,15 +124,19 @@ export class StatsManager {
     if (this.focusMode) {
       this._startFocusChecking();
     }
+    this.emit('gameStateChanged', { isPlaying: true });
   }
 
   stopPlaying() {
     this.gameState.isPlaying = false;
     this._stopFocusChecking();
+    this.emit('gameStateChanged', { isPlaying: false });
   }
 
   reset() {
     console.log('[StatsManager] 重置所有统计');
+
+    const oldStats = this.getStats();
 
     this.gameStats = {
       totalHits: 0,
@@ -109,7 +151,9 @@ export class StatsManager {
     };
     this._resetFocusData();
 
-    this.callbacks.onStatsChange?.();
+    const newStats = this.getStats();
+
+    this.emit('statsReset', { oldStats, newStats });
   }
 
   // === 数据获取 ===
@@ -123,7 +167,7 @@ export class StatsManager {
     const playTime = this._calculatePlayTime();
     const cps = Math.round((this.gameStats.totalHits / playTime) * 10) / 10;
 
-    const result = {
+    return {
       accuracy,
       cps,
       maxCombo: this.gameStats.maxCombo || 0,
@@ -132,9 +176,6 @@ export class StatsManager {
       totalMisses: this.gameStats.totalMisses || 0,
       playTime: Math.round(playTime * 10) / 10,
     };
-
-    console.log('[StatsManager] 获取统计:', result);
-    return result;
   }
 
   // === 内部方法 ===
@@ -155,25 +196,45 @@ export class StatsManager {
   }
 
   _updateComboStats(isHit) {
-    if (!isHit && this.gameStats.currentCombo > 5) {
-      console.log(`[StatsManager] 连击中断: ${this.gameStats.currentCombo}`);
-      this.callbacks.onComboBreak?.(this.gameStats.currentCombo);
-    }
-
     const oldCombo = this.gameStats.currentCombo;
-    this.gameStats.currentCombo = isHit ? this.gameStats.currentCombo + 1 : 0;
     const oldMaxCombo = this.gameStats.maxCombo;
+
+    // 检查连击中断
+    const comboBreak =
+      !isHit && oldCombo > 5
+        ? {
+          combo: oldCombo,
+          wasSignificant: true,
+        }
+        : null;
+
+    // 更新连击数
+    this.gameStats.currentCombo = isHit ? this.gameStats.currentCombo + 1 : 0;
     this.gameStats.maxCombo = Math.max(
       this.gameStats.maxCombo,
       this.gameStats.currentCombo
     );
 
-    console.log(
-      `[StatsManager] 连击: ${oldCombo} -> ${this.gameStats.currentCombo}`
-    );
-    if (this.gameStats.maxCombo > oldMaxCombo) {
-      console.log(`[StatsManager] 新的最大连击: ${this.gameStats.maxCombo}`);
+    const newCombo = this.gameStats.currentCombo;
+    const newMaxCombo = this.gameStats.maxCombo;
+
+    console.log(`[StatsManager] 连击: ${oldCombo} -> ${newCombo}`);
+
+    if (comboBreak) {
+      console.log(`[StatsManager] 连击中断: ${comboBreak.combo}`);
     }
+
+    if (newMaxCombo > oldMaxCombo) {
+      console.log(`[StatsManager] 新的最大连击: ${newMaxCombo}`);
+    }
+
+    // 返回连击变化信息
+    return {
+      oldCombo,
+      newCombo,
+      maxComboChanged: newMaxCombo > oldMaxCombo,
+      comboBreak,
+    };
   }
 
   _calculatePlayTime() {
@@ -210,7 +271,7 @@ export class StatsManager {
       if (timeSinceLastAction > 1000) {
         console.log('[StatsManager] 专注模式: 操作超时，游戏结束');
         this._stopFocusChecking();
-        this.callbacks.onFocusModeGameEnd?.('timeout');
+        this.emit('focusGameEnd', { reason: 'timeout' });
       }
     }, 200);
   }
@@ -222,11 +283,9 @@ export class StatsManager {
     }
   }
 
-  // === 事件回调设置 ===
-  set onStatsChange(callback) {
-    this.callbacks.onStatsChange = callback;
-  }
-  set onFocusModeGameEnd(callback) {
-    this.callbacks.onFocusModeGameEnd = callback;
+  // === 清理资源 ===
+  destroy() {
+    this._stopFocusChecking();
+    this.eventListeners.clear();
   }
 }
