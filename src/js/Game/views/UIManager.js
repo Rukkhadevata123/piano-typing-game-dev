@@ -302,34 +302,112 @@ export class UIManager {
   }
 
   _addLevelTooltip(levelEl) {
+    // 移除可能存在的旧tooltip
+    const existingTooltip = document.querySelector('.level-tooltip-global');
+    if (existingTooltip) {
+      existingTooltip.remove();
+    }
+
+    // 创建全局tooltip
     const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
+    tooltip.className = 'level-tooltip-global';
     tooltip.innerHTML = `
-      <div class="level-tooltip-title">段位排序 (由低到高)</div>
+      <div class="level-tooltip-title">🏆 段位排序 (由低到高)</div>
       ${this._generateLevelTooltipItems()}
     `;
-    levelEl.appendChild(tooltip);
+
+    // 直接添加到body
+    document.body.appendChild(tooltip);
+
+    // 鼠标进入显示
+    levelEl.addEventListener('mouseenter', (e) => {
+      this._positionTooltip(tooltip, e.currentTarget);
+      tooltip.classList.add('show');
+    });
+
+    // 鼠标离开隐藏
+    levelEl.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+
+    // 页面卸载时清理
+    window.addEventListener('beforeunload', () => {
+      if (document.body.contains(tooltip)) {
+        document.body.removeChild(tooltip);
+      }
+    });
+  }
+
+  /**
+   * 动态定位tooltip - 简化版本，确保在视窗内
+   */
+  _positionTooltip(tooltip, triggerElement) {
+    const rect = triggerElement.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // 默认位置：触发元素右下方
+    let left = rect.right + 12;
+    let top = rect.top;
+
+    // 如果右侧空间不够，放到左侧
+    if (left + 320 > viewportWidth - 16) {
+      left = rect.left - 320 - 12;
+    }
+
+    // 如果左侧也不够，居中显示
+    if (left < 16) {
+      left = (viewportWidth - 320) / 2;
+    }
+
+    // 确保不超出底部
+    if (top + 400 > viewportHeight - 16) {
+      top = viewportHeight - 400 - 16;
+    }
+
+    // 确保不超出顶部
+    if (top < 16) {
+      top = 16;
+    }
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
   }
 
   _generateLevelTooltipItems() {
     const levels = [
-      { name: '青铜等级', color: '#cd7f32', range: '0-5000分' },
-      { name: '白银等级', color: '#c0c0c0', range: '5000-6250分' },
-      { name: '黄金等级', color: '#ffd700', range: '6250-7500分' },
-      { name: '蓝宝石等级', color: '#0073cf', range: '7500-8750分' },
-      { name: '红宝石等级', color: '#e0115f', range: '8750-10000分' },
-      { name: '绿宝石等级', color: '#50c878', range: '10000-11250分' },
-      { name: '紫水晶等级', color: '#9966cc', range: '11250-12500分' },
-      { name: '珍珠等级', color: '#fdeef4', range: '12500-13750分' },
-      { name: '黑曜石等级', color: '#413839', range: '13750-15000分' },
-      { name: '钻石等级', color: '#b9f2ff', range: '15000分以上' },
+      { name: '青铜等级', color: '#cd7f32', range: '0-5000', icon: '🥉' },
+      { name: '白银等级', color: '#c0c0c0', range: '5000-6250', icon: '🥈' },
+      { name: '黄金等级', color: '#ffd700', range: '6250-7500', icon: '🥇' },
+      { name: '蓝宝石等级', color: '#0073cf', range: '7500-8750', icon: '💎' },
+      { name: '红宝石等级', color: '#e0115f', range: '8750-10000', icon: '♦️' },
+      {
+        name: '绿宝石等级',
+        color: '#50c878',
+        range: '10000-11250',
+        icon: '💚',
+      },
+      {
+        name: '紫水晶等级',
+        color: '#9966cc',
+        range: '11250-12500',
+        icon: '🔮',
+      },
+      { name: '珍珠等级', color: '#fdeef4', range: '12500-13750', icon: '🤍' },
+      {
+        name: '黑曜石等级',
+        color: '#413839',
+        range: '13750-15000',
+        icon: '⚫',
+      },
+      { name: '钻石等级', color: '#b9f2ff', range: '15000+', icon: '💎' },
     ];
 
     return levels
       .map(
         (level) =>
           `<div class="level-tooltip-item">
-        <span style="color:${level.color}">●</span>
+        <span style="color:${level.color}">${level.icon}</span>
         <span style="color:${level.color}">${level.name}</span>
         <span>${level.range}</span>
       </div>`

@@ -233,44 +233,49 @@
     display: inline-block;
 }
 
-/* === 提示框 - 超高层级，确保在所有元素之上 === */
-.tooltip {
-    visibility: hidden;
-    position: absolute;
-    z-index: calc(var(--z-index-overlay) + 200);
-    /* 超高层级，确保在游戏方块之上 */
-    top: 100%;
-    left: 50%;
-    margin-top: 10px;
-    transform: translateX(-50%);
-    width: 280px;
-    background: rgba(0, 0, 0, 0.95);
-    /* 加深背景，提高可见性 */
+/* === 提示框 - 绝对最高层级，直接添加到body下 === */
+.level-tooltip-global {
+    position: fixed;
+    z-index: 999999;
+    /* 绝对最高层级 */
+    width: 320px;
+    background: rgba(0, 0, 0, 0.98);
     color: white;
-    padding: 12px;
+    padding: 16px;
     border-radius: var(--border-radius);
     font-size: 0.9em;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    /* 加强阴影 */
-    transition: opacity var(--duration-fast) var(--animation-timing), visibility var(--duration-fast) var(--animation-timing);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    /* 添加边框增强可见性 */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 3px rgba(255, 215, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border: 4px solid rgba(255, 215, 0, 0.8);
     pointer-events: none;
-    /* 防止鼠标交互干扰 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-fast) ease, visibility var(--duration-fast) ease;
 }
 
-#rating-level:hover .tooltip {
-    visibility: visible;
+.level-tooltip-global.show {
     opacity: 1;
+    visibility: visible;
+}
+
+/* 移除原有的tooltip样式冲突 */
+#rating-level .tooltip {
+    display: none;
 }
 
 .level-tooltip-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 3px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 0;
+    /* 增加垂直间距 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    transition: background-color 0.2s ease;
+}
+
+.level-tooltip-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
 
 .level-tooltip-item:last-child {
@@ -279,12 +284,37 @@
 
 .level-tooltip-title {
     font-weight: bold;
-    margin-bottom: var(--spacing-small);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: var(--spacing-small);
+    margin-bottom: var(--spacing);
+    border-bottom: 2px solid rgba(255, 215, 0, 0.6);
+    /* 金色分割线 */
+    padding-bottom: var(--spacing);
     text-align: center;
     color: #ffd700;
-    /* 金色标题 */
+    font-size: 1.1em;
+    /* 稍微增大标题字体 */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    /* 金色发光效果 */
+}
+
+/* 段位图标样式优化 */
+.level-tooltip-item span:first-child {
+    font-size: 1.2em;
+    margin-right: 8px;
+    text-shadow: 0 0 4px currentColor;
+}
+
+/* 段位名称样式 */
+.level-tooltip-item span:nth-child(2) {
+    font-weight: 600;
+    text-shadow: 0 0 3px currentColor;
+}
+
+/* 分数范围样式 */
+.level-tooltip-item span:last-child {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85em;
+    font-family: monospace;
+    /* 使用等宽字体显示数字 */
 }
 
 /* === 按钮容器样式 === */
